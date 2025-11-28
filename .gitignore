@@ -1,0 +1,8 @@
+# Ignore local credentials that contain secrets
+credentials.js
+credentials.local.js
+
+# Node / editor / OS
+node_modules/
+.vscode/
+.DS_Store
