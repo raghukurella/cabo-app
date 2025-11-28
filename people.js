@@ -1,0 +1,436 @@
+const { createClient } = supabase;
+
+// Initialize Supabase client using credentials from credentials.js
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+// --- Global State ---
+const state = {
+  currentPage: 0,
+  pageSize: 10,
+  filters: { gender: '', zip: '', education: '' },
+  searchTerm: '',
+  usersById: {},
+  questions: []
+};
+
+// --- Helper Functions ---
+function calculateAge(dateOfBirth) {
+  if (!dateOfBirth) return '';
+  
+  // If it's just a year (e.g., "2001"), treat it as Jan 1 of that year
+  let birthDate;
+  if (/^\d{4}$/.test(dateOfBirth.toString().trim())) {
+    // Year-only value
+    birthDate = new Date(`${dateOfBirth}-01-01`);
+  } else {
+    // Full date value
+    birthDate = new Date(dateOfBirth);
+  }
+  
+  // Validate the date
+  if (isNaN(birthDate.getTime())) {
+    return '';
+  }
+  
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age > 0 ? age : '';
+}
+
+// --- UI Rendering ---
+function renderHeader() {
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+  ['Full Name','Gender','Age','Phone','Education','Actions'].forEach(label => {
+    const th = document.createElement('th');
+    th.textContent = label;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+  return thead;
+}
+
+function renderRow(user, questions) {
+  const row = document.createElement('tr');
+  const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+  row.innerHTML = `
+    <td>${fullName}</td>
+    <td>${user.gender || ''}</td>
+    <td>${calculateAge(user.date_of_birth)}</td>
+    <td>${user.phone_number || ''}</td>
+    <td>${user.education || ''}</td>
+    <td><button class="detailsBtn">View Details</button></td>
+  `;
+
+  // Hidden details row
+  const detailsRow = document.createElement('tr');
+  detailsRow.style.display = 'none';
+  const detailsCell = document.createElement('td');
+  detailsCell.colSpan = 5;
+
+  let detailsHTML = `
+    <strong>Full Name:</strong> ${fullName}<br>
+    <strong>Zip:</strong> ${user.zip || ''}<br>
+    <strong>Email:</strong> ${user.email || ''}<br>
+    <strong>Responses:</strong><br>
+    <ul>
+  `;
+  questions.forEach(q => {
+    detailsHTML += `<li>${q}: ${user.responses[q] || ''}</li>`;
+  });
+  detailsHTML += `</ul>
+    <button class="removeBtn">🗑️ Remove</button>
+  `;
+
+  detailsCell.innerHTML = detailsHTML;
+  detailsRow.appendChild(detailsCell);
+
+  // Toggle details
+  row.querySelector('.detailsBtn').addEventListener('click', () => {
+    detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+  });
+
+  // Remove logic (soft delete)
+  detailsRow.querySelector('.removeBtn').addEventListener('click', async () => {
+    const confirmed = confirm(`Remove ${user.first_name || ''} ${user.last_name || ''}?`);
+    if (!confirmed) return;
+
+    if (!user.demographic_id) {
+      console.error('Missing demographic_id for removal.');
+      alert('Cannot remove: missing ID.');
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from('demographics')
+      .update({
+        deleted_date: new Date().toISOString(),
+        deleted_by: 'system' // TODO: replace with logged-in user
+      })
+      .eq('id', user.demographic_id);
+
+    if (error) {
+      console.error('Error marking deleted:', error.message);
+      alert('Error removing user.');
+      return;
+    }
+
+    // Refresh local data and re-render
+    await hydrateResults(); // re-fetch results/views to update state.usersById
+    loadResults(state.currentPage, state.filters, state.searchTerm);
+  });
+
+  return [row, detailsRow];
+}
+
+function renderBody(users, questions) {
+  const tbody = document.createElement('tbody');
+  users.forEach(user => {
+    const [mainRow, detailsRow] = renderRow(user, questions);
+    tbody.appendChild(mainRow);
+    tbody.appendChild(detailsRow);
+  });
+  return tbody;
+}
+
+function renderPagination(currentPage, totalPages) {
+  const pagination = document.getElementById('paginationControls');
+  pagination.innerHTML = '';
+
+  if (totalPages <= 1) return; // hide pagination if only one page or empty
+
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Previous';
+  prevBtn.disabled = currentPage <= 0;
+  prevBtn.onclick = () => loadResults(currentPage - 1, state.filters, state.searchTerm);
+
+  const pageInfo = document.createElement('span');
+  pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+  pageInfo.className = 'page-info';
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.disabled = currentPage >= totalPages - 1;
+  nextBtn.onclick = () => loadResults(currentPage + 1, state.filters, state.searchTerm);
+
+  pagination.appendChild(prevBtn);
+  pagination.appendChild(pageInfo);
+  pagination.appendChild(nextBtn);
+}
+
+function renderTable(users, questions, totalUsers, totalPages) {
+  const container = document.getElementById('resultsContainer');
+  container.innerHTML = '';
+
+  if (!users || users.length === 0) {
+    container.innerHTML = '<p>No results found.</p>';
+    document.getElementById('paginationControls').innerHTML = '';
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.appendChild(renderHeader());
+  table.appendChild(renderBody(users, questions));
+  container.appendChild(table);
+
+  renderPagination(state.currentPage, totalPages);
+}
+
+// --- Filtering ---
+function applyFilters(users, filters = {}, searchTerm = '') {
+  const term = (searchTerm || '').toLowerCase();
+
+  return users.filter(u => {
+    const genderMatch = !filters.gender ||
+      (u.gender || '').toLowerCase() === filters.gender.toLowerCase();
+
+    const zipMatch = !filters.zip ||
+      (u.zip || '').toLowerCase().includes(filters.zip.toLowerCase());
+
+    const educationMatch = !filters.education ||
+      (u.education || '').toLowerCase() === filters.education.toLowerCase();
+
+    const searchMatch = !term ||
+      (u.first_name || '').toLowerCase().includes(term) ||
+      (u.last_name || '').toLowerCase().includes(term) ||
+      (u.education || '').toLowerCase().includes(term);
+
+    return genderMatch && zipMatch && educationMatch && searchMatch;
+  });
+}
+
+// --- Data Fetch from Views ---
+async function fetchFromFirstAvailableView() {
+  const viewCandidates = ['unified_results', 'matchmaker_results'];
+
+  for (const viewName of viewCandidates) {
+    const { data, error } = await supabaseClient
+      .from(viewName)
+      .select('*')
+      .limit(2000);
+
+    if (error) {
+      console.warn(`${viewName} query error:`, error.message || error);
+      continue;
+    }
+
+    // Filter out deleted rows client-side
+    const nonDeletedRows = (data || []).filter(row => !row.deleted_date);
+    if (nonDeletedRows && nonDeletedRows.length) {
+      return { view: viewName, rows: nonDeletedRows };
+    }
+  }
+
+  return { view: null, rows: [] };
+}
+
+function groupRowsIntoUsers(rows) {
+  const usersById = {};
+  const questionsSet = new Set();
+
+  rows.forEach(row => {
+    const key = row.demographic_id;
+    if (!key) return;
+
+    if (row.question_text) {
+      questionsSet.add(row.question_text);
+    }
+
+    if (!usersById[key]) {
+      // Split full_name into first and last name
+      const [firstName, ...lastNameParts] = (row.full_name || '').split(' ');
+      const lastName = lastNameParts.join(' ');
+
+      usersById[key] = {
+        demographic_id: row.demographic_id,
+        first_name: firstName || '',
+        last_name: lastName || '',
+        email: row.email || '',
+        phone_number: row.phone_number || '',
+        gender: row.gender || '',
+        zip: row.zip || '',
+        date_of_birth: row.date_of_birth || '',
+        education: row.education || '',
+        responses: {}
+      };
+    }
+
+    if (row.question_text && row.answer) {
+      usersById[key].responses[row.question_text] = row.answer ? 'Yes' : 'No';
+    }
+  });
+
+  return { usersById, questions: Array.from(questionsSet) };
+}
+
+async function hydrateResults() {
+  const { view, rows } = await fetchFromFirstAvailableView();
+  const { usersById, questions } = groupRowsIntoUsers(rows);
+
+  // Fetch all demographics and extract needed columns client-side
+  const { data: demographics, error } = await supabaseClient
+    .from('demographics')
+    .select('*')
+    .limit(2000);
+
+  if (!error && demographics) {
+    const demographicIds = new Set(Object.keys(usersById));
+    demographics.forEach(demo => {
+      if (demographicIds.has(demo.id)) {
+        usersById[demo.id].phone_number = demo.phone_number || '';
+        usersById[demo.id].zip = demo.zip || '';
+        usersById[demo.id].date_of_birth = demo.date_of_birth || '';
+        usersById[demo.id].education = demo.highest_education_level || '';
+      }
+    });
+  }
+
+  state.usersById = usersById;
+  state.questions = questions;
+}
+
+// --- Populate Filters ---
+async function populateFilters() {
+  const genderSelect   = document.getElementById('filterGender');
+  const zipSelect      = document.getElementById('filterZip');
+  const educationSelect= document.getElementById('filterEducation');
+
+  if (!genderSelect || !zipSelect || !educationSelect) {
+    console.error('Filter elements not found.');
+    return;
+  }
+
+  genderSelect.innerHTML   = '<option value="">All</option>';
+  zipSelect.innerHTML      = '<option value="">All</option>';
+  educationSelect.innerHTML= '<option value="">All</option>';
+
+  // Fetch all demographics once to avoid multi-column select issues with UMD library
+  const { data: allDemographics, error: fetchError } = await supabaseClient
+    .from('demographics')
+    .select('*')
+    .limit(2000);
+
+  if (fetchError) {
+    console.error('Filter fetch error:', fetchError);
+    alert('Error loading filters.');
+    return;
+  }
+
+  const rows = allDemographics || [];
+
+  // Filter out deleted rows and extract unique values client-side
+  const uniqueGenders = [...new Set(rows
+    .filter(r => !r.deleted_date && r.gender)
+    .map(r => r.gender.trim()))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+  
+  const uniqueZips = [...new Set(rows
+    .filter(r => !r.deleted_date && r.zip)
+    .map(r => r.zip.trim()))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  const uniqueEducations = [...new Set(rows
+    .filter(r => !r.deleted_date && r.highest_education_level)
+    .map(r => r.highest_education_level.trim()))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  // Populate dropdowns
+  uniqueGenders.forEach(gender => {
+    const opt = document.createElement('option');
+    opt.value = gender;
+    opt.textContent = gender;
+    genderSelect.appendChild(opt);
+  });
+
+  uniqueZips.forEach(zip => {
+    const opt = document.createElement('option');
+    opt.value = zip;
+    opt.textContent = zip;
+    zipSelect.appendChild(opt);
+  });
+
+  uniqueEducations.forEach(education => {
+    const opt = document.createElement('option');
+    opt.value = education;
+    opt.textContent = education;
+    educationSelect.appendChild(opt);
+  });
+}
+
+// --- Results + Pagination ---
+function loadResults(page = 0, filters = {}, searchTerm = '') {
+  state.currentPage = page;
+  state.filters = filters;
+  state.searchTerm = searchTerm;
+
+  const allUsers = Object.values(state.usersById);
+  const filteredUsers = applyFilters(allUsers, filters, searchTerm);
+
+  const totalUsers = filteredUsers.length;
+  if (totalUsers === 0) {
+    renderTable([], state.questions, 0, 1);
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalUsers / state.pageSize));
+  const safePage = Math.min(page, totalPages - 1);
+  const start = safePage * state.pageSize;
+  const end = start + state.pageSize;
+  const pageUsers = filteredUsers.slice(start, end);
+
+  renderTable(pageUsers, state.questions, totalUsers, totalPages);
+}
+
+// --- Event Listeners ---
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await populateFilters();
+    await hydrateResults();
+    loadResults(0, state.filters, state.searchTerm);
+  } catch (err) {
+    console.error('Initialization error:', err);
+    alert('Error initializing page.');
+  }
+
+  // Apply Filters
+  document.getElementById('applyFilters')?.addEventListener('click', () => {
+    const nextFilters = {
+      gender: document.getElementById('filterGender')?.value || '',
+      zip: document.getElementById('filterZip')?.value || '',
+      education: document.getElementById('filterEducation')?.value || ''
+    };
+    loadResults(0, nextFilters, state.searchTerm);
+  });
+
+  // Reset Filters + Search
+  document.getElementById('resetFilters')?.addEventListener('click', () => {
+    document.getElementById('filterGender').value = '';
+    document.getElementById('filterZip').value = '';
+    document.getElementById('filterEducation').value = '';
+    document.getElementById('searchInput').value = '';
+
+    loadResults(0, { gender: '', zip: '', education: '' }, '');
+  });
+
+  // Search
+  document.getElementById('searchButton')?.addEventListener('click', () => {
+    const term = document.getElementById('searchInput')?.value || '';
+    loadResults(0, state.filters, term);
+  });
+
+  // Optional: live search on input
+  document.getElementById('searchInput')?.addEventListener('input', (e) => {
+    const term = e.target.value || '';
+    loadResults(0, state.filters, term);
+  });
+});

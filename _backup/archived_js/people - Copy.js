@@ -1,0 +1,212 @@
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
+  'https://tshowljfunfshsodwgtf.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzaG93bGpmdW5mc2hzb2R3Z3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNDYzMDksImV4cCI6MjA3ODcyMjMwOX0.-bdEZsKrw1V58fW-P80WYczV1K-z3vBvlTiILiGNcrg'
+);
+
+async function loadResults() {
+    const { data, error } = await supabaseClient
+      .from('matchmaker_results')
+      .select('*');
+  
+    if (error) {
+      console.error('Results error:', error);
+      return;
+    }
+  
+    const container = document.getElementById('resultsContainer');
+    container.innerHTML = '';
+  
+    // Collect all unique questions
+    const questions = [...new Set(data.map(row => row.question_text))];
+  
+    // Build user objects with demographics + answers
+    const users = {};
+    data.forEach(row => {
+      const key = row.demographic_id;
+      if (!users[key]) {
+        users[key] = {
+          first_name: row.first_name,
+          last_name: row.last_name,
+          email: row.email,
+          gender: row.gender,
+          location: row.location,
+          education: row.education,
+          responses: {}
+        };
+      }
+      users[key].responses[row.question_text] = row.answer ? 'Yes' : 'No';
+    });
+  
+    // Build unified table
+    const table = document.createElement('table');
+  
+    // Header row: demographics + questions
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['First Name','Last Name','Email','Gender','Location','Education'].forEach(label => {
+      const th = document.createElement('th');
+      th.textContent = label;
+      headerRow.appendChild(th);
+    });
+    questions.forEach(q => {
+      const th = document.createElement('th');
+      th.textContent = q;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+  
+    // Body rows
+    const tbody = document.createElement('tbody');
+    Object.values(users).forEach(user => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${user.first_name}</td>
+        <td>${user.last_name}</td>
+        <td>${user.email}</td>
+        <td>${user.gender}</td>
+        <td>${user.location}</td>
+        <td>${user.education}</td>
+      `;
+      questions.forEach(q => {
+        const td = document.createElement('td');
+        td.textContent = user.responses[q] || '';
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+    });
+  
+    table.appendChild(tbody);
+    container.appendChild(table);
+  }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load results table
+    loadResults();
+  
+    // Load all people initially
+    //loadPeople();
+  
+    // Hook up filter button
+    document.getElementById('applyFilters').addEventListener('click', () => {
+      const filters = {
+        gender: document.getElementById('filterGender').value.toLowerCase(), // normalize
+        location: document.getElementById('filterLocation').value,
+        education: document.getElementById('filterEducation').value
+      };
+      console.log('Applying filters:', filters);
+      loadPeople(filters);
+    });
+  });
+
+
+
+
+  async function loadPeople(filters = {}) {
+    let query = supabaseClient.from('demographics').select('*');
+  
+    if (filters.gender) query = query.eq('gender', filters.gender.toLowerCase());
+    if (filters.location) query = query.ilike('location', `%${filters.location}%`);
+    if (filters.education) query = query.eq('education', filters.education);
+  
+    const { data, error } = await query;
+    if (error) {
+      console.error('Error fetching people:', error);
+      return;
+    }
+  
+    renderTable('peopleList', data, [
+      { key: 'first_name', label: 'First Name' },
+      { key: 'last_name', label: 'Last Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'gender', label: 'Gender' },
+      { key: 'location', label: 'Location' },
+      { key: 'education', label: 'Education' }
+    ]);
+  }
+  
+  
+
+  function renderPeople(people) {
+    const container = document.getElementById('peopleList');
+    container.innerHTML = '';
+  
+    if (!people || people.length === 0) {
+      container.innerHTML = '<p>No results found.</p>';
+      return;
+    }
+  
+    const table = document.createElement('table');
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Gender</th>
+          <th>Location</th>
+          <th>Education</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+  
+    const tbody = table.querySelector('tbody');
+  
+    people.forEach(person => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${person.first_name} ${person.last_name}</td>
+        <td>${person.email}</td>
+        <td>${person.gender}</td>
+        <td>${person.location}</td>
+        <td>${person.education}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  
+    container.appendChild(table);
+  }
+  
+
+
+
+  function renderTable(containerId, data, columns) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+  
+    if (!data || data.length === 0) {
+      container.innerHTML = '<p>No results found.</p>';
+      return;
+    }
+  
+    const table = document.createElement('table');
+  
+    // Build header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    columns.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col.label;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+  
+    // Build body
+    const tbody = document.createElement('tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      columns.forEach(col => {
+        const td = document.createElement('td');
+        td.textContent = item[col.key] ?? '';
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+  
+    container.appendChild(table);
+  }
+  
