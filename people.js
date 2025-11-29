@@ -1,43 +1,41 @@
-const { createClient } = supabase;
-
-// Initialize Supabase client using credentials from credentials.js
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+// --- UI Toggle for Filters ---
 document.addEventListener('DOMContentLoaded', () => {
   const searchBar = document.getElementById('searchBar');
   const filtersPanel = document.getElementById('filtersPanel');
   const toggleBtn = document.getElementById('toggleFilters');
   const applyBtn = document.getElementById('applyFilters');
 
+  if (!searchBar || !filtersPanel || !toggleBtn || !applyBtn) {
+    console.warn('Filter UI elements missing');
+    return;
+  }
+
   // Start collapsed
   searchBar.classList.add('hidden');
   filtersPanel.classList.add('hidden');
   toggleBtn.textContent = 'Show Filters';
 
-function toggleFilters() {
-  const isHidden = filtersPanel.classList.contains('hidden');
-  if (isHidden) {
-    searchBar.classList.remove('hidden');
-    filtersPanel.classList.remove('hidden');
-    toggleBtn.textContent = 'Hide Filters';
-  } else {
-    searchBar.classList.add('hidden');
-    filtersPanel.classList.add('hidden');
-    toggleBtn.textContent = 'Show Filters';
+  function toggleFilters() {
+    const isHidden = filtersPanel.classList.contains('hidden');
+    if (isHidden) {
+      searchBar.classList.remove('hidden');
+      filtersPanel.classList.remove('hidden');
+      toggleBtn.textContent = 'Hide Filters';
+    } else {
+      searchBar.classList.add('hidden');
+      filtersPanel.classList.add('hidden');
+      toggleBtn.textContent = 'Show Filters';
+    }
   }
-}
 
-// Toggle button uses the function
-toggleBtn.addEventListener('click', toggleFilters);
+  // Toggle button uses the function
+  toggleBtn.addEventListener('click', toggleFilters);
 
-// Apply button can also collapse after applying filters
-applyBtn.addEventListener('click', () => {
-  toggleFilters();           // collapse panels after applying
+  // Apply button can also collapse after applying filters
+  applyBtn.addEventListener('click', () => {
+    toggleFilters(); // collapse panels after applying
+  });
 });
-
-});
-
-
 
 // --- Global State ---
 const state = {
@@ -52,22 +50,18 @@ const state = {
 // --- Helper Functions ---
 function calculateAge(dateOfBirth) {
   if (!dateOfBirth) return '';
-  
-  // If it's just a year (e.g., "2001"), treat it as Jan 1 of that year
+
   let birthDate;
   if (/^\d{4}$/.test(dateOfBirth.toString().trim())) {
-    // Year-only value
     birthDate = new Date(`${dateOfBirth}-01-01`);
   } else {
-    // Full date value
     birthDate = new Date(dateOfBirth);
   }
-  
-  // Validate the date
+
   if (isNaN(birthDate.getTime())) {
     return '';
   }
-  
+
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -82,8 +76,7 @@ function renderHeader() {
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
 
-  // Removed "Gender" column
-  ['Full Name','Age','Phone','Education','Actions'].forEach(label => {
+  ['Full Name', 'Age', 'Phone', 'Education', 'Actions'].forEach(label => {
     const th = document.createElement('th');
     th.textContent = label;
     headerRow.appendChild(th);
@@ -93,11 +86,9 @@ function renderHeader() {
   return thead;
 }
 
-
 function renderRow(user, questions) {
   const row = document.createElement('tr');
 
-  // Apply background color based on gender
   if (user.gender) {
     const g = user.gender.toLowerCase();
     if (g === 'female') {
@@ -117,7 +108,6 @@ function renderRow(user, questions) {
     <td class="actions-cell"><button class="detailsBtn iconBtn">☰</button></td>
   `;
 
-  // Hidden details row
   const detailsRow = document.createElement('tr');
   detailsRow.style.display = 'none';
   const detailsCell = document.createElement('td');
@@ -131,26 +121,28 @@ function renderRow(user, questions) {
     <ul>
   `;
   questions.forEach(q => {
-    detailsHTML += `<li>${q}: ${user.responses[q] || ''}</li>`;
+    const val = user.responses[q];
+    const display = val === null || val === undefined ? '' : val;
+    detailsHTML += `<li>${q}: ${display}</li>`;
   });
+
+  // Embed UUID for soft delete (from demographic_id)
   detailsHTML += `</ul>
-    <button class="removeBtn">🗑️ Remove</button>
+    <button class="removeBtn" data-id="${user.demographic_id}">🗑️ Remove</button>
   `;
 
   detailsCell.innerHTML = detailsHTML;
   detailsRow.appendChild(detailsCell);
 
-  // Toggle details
-  row.querySelector('.detailsBtn').addEventListener('click', () => {
-    detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
-  });
-
-  // Remove logic remains unchanged...
-  // ...
+  const detailsBtn = row.querySelector('.detailsBtn');
+  if (detailsBtn) {
+    detailsBtn.addEventListener('click', () => {
+      detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+    });
+  }
 
   return [row, detailsRow];
 }
-
 
 function renderBody(users, questions) {
   const tbody = document.createElement('tbody');
@@ -164,9 +156,10 @@ function renderBody(users, questions) {
 
 function renderPagination(currentPage, totalPages) {
   const pagination = document.getElementById('paginationControls');
+  if (!pagination) return;
   pagination.innerHTML = '';
 
-  if (totalPages <= 1) return; // hide pagination if only one page or empty
+  if (totalPages <= 1) return;
 
   const prevBtn = document.createElement('button');
   prevBtn.textContent = 'Previous';
@@ -189,11 +182,13 @@ function renderPagination(currentPage, totalPages) {
 
 function renderTable(users, questions, totalUsers, totalPages) {
   const container = document.getElementById('resultsContainer');
+  if (!container) return;
   container.innerHTML = '';
 
   if (!users || users.length === 0) {
     container.innerHTML = '<p>No results found.</p>';
-    document.getElementById('paginationControls').innerHTML = '';
+    const pag = document.getElementById('paginationControls');
+    if (pag) pag.innerHTML = '';
     return;
   }
 
@@ -228,12 +223,12 @@ function applyFilters(users, filters = {}, searchTerm = '') {
   });
 }
 
-// --- Data Fetch from Views ---
+// --- Data Fetch ---
 async function fetchFromFirstAvailableView() {
   const viewCandidates = ['unified_results', 'matchmaker_results'];
 
   for (const viewName of viewCandidates) {
-    const { data, error } = await supabaseClient
+    const { data, error } = await window.supabaseClient
       .from(viewName)
       .select('*')
       .limit(2000);
@@ -243,7 +238,6 @@ async function fetchFromFirstAvailableView() {
       continue;
     }
 
-    // Filter out deleted rows client-side
     const nonDeletedRows = (data || []).filter(row => !row.deleted_date);
     if (nonDeletedRows && nonDeletedRows.length) {
       return { view: viewName, rows: nonDeletedRows };
@@ -266,7 +260,6 @@ function groupRowsIntoUsers(rows) {
     }
 
     if (!usersById[key]) {
-      // Split full_name into first and last name
       const [firstName, ...lastNameParts] = (row.full_name || '').split(' ');
       const lastName = lastNameParts.join(' ');
 
@@ -284,8 +277,11 @@ function groupRowsIntoUsers(rows) {
       };
     }
 
-    if (row.question_text && row.answer) {
-      usersById[key].responses[row.question_text] = row.answer ? 'Yes' : 'No';
+    if (row.question_text) {
+      usersById[key].responses[row.question_text] =
+        row.answer === null || row.answer === undefined
+          ? ''
+          : (row.answer ? 'Yes' : 'No');
     }
   });
 
@@ -296,8 +292,8 @@ async function hydrateResults() {
   const { view, rows } = await fetchFromFirstAvailableView();
   const { usersById, questions } = groupRowsIntoUsers(rows);
 
-  // Fetch all demographics and extract needed columns client-side
-  const { data: demographics, error } = await supabaseClient
+  // Enrich from demographics
+  const { data: demographics, error } = await window.supabaseClient
     .from('demographics')
     .select('*')
     .limit(2000);
@@ -310,6 +306,9 @@ async function hydrateResults() {
         usersById[demo.id].zip = demo.zip || '';
         usersById[demo.id].date_of_birth = demo.date_of_birth || '';
         usersById[demo.id].education = demo.highest_education_level || '';
+        if (!usersById[demo.id].email && demo.email) {
+          usersById[demo.id].email = demo.email;
+        }
       }
     });
   }
@@ -320,21 +319,20 @@ async function hydrateResults() {
 
 // --- Populate Filters ---
 async function populateFilters() {
-  const genderSelect   = document.getElementById('filterGender');
-  const zipSelect      = document.getElementById('filterZip');
-  const educationSelect= document.getElementById('filterEducation');
+  const genderSelect = document.getElementById('filterGender');
+  const zipSelect = document.getElementById('filterZip');
+  const educationSelect = document.getElementById('filterEducation');
 
   if (!genderSelect || !zipSelect || !educationSelect) {
     console.error('Filter elements not found.');
     return;
   }
 
-  genderSelect.innerHTML   = '<option value="">All</option>';
-  zipSelect.innerHTML      = '<option value="">All</option>';
-  educationSelect.innerHTML= '<option value="">All</option>';
+  genderSelect.innerHTML = '<option value="">All</option>';
+  zipSelect.innerHTML = '<option value="">All</option>';
+  educationSelect.innerHTML = '<option value="">All</option>';
 
-  // Fetch all demographics once to avoid multi-column select issues with UMD library
-  const { data: allDemographics, error: fetchError } = await supabaseClient
+  const { data: allDemographics, error: fetchError } = await window.supabaseClient
     .from('demographics')
     .select('*')
     .limit(2000);
@@ -347,13 +345,12 @@ async function populateFilters() {
 
   const rows = allDemographics || [];
 
-  // Filter out deleted rows and extract unique values client-side
   const uniqueGenders = [...new Set(rows
     .filter(r => !r.deleted_date && r.gender)
     .map(r => r.gender.trim()))]
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
-  
+
   const uniqueZips = [...new Set(rows
     .filter(r => !r.deleted_date && r.zip)
     .map(r => r.zip.trim()))]
@@ -366,7 +363,6 @@ async function populateFilters() {
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
 
-  // Populate dropdowns
   uniqueGenders.forEach(gender => {
     const opt = document.createElement('option');
     opt.value = gender;
@@ -413,7 +409,56 @@ function loadResults(page = 0, filters = {}, searchTerm = '') {
   renderTable(pageUsers, state.questions, totalUsers, totalPages);
 }
 
-// --- Event Listeners ---
+// --- Soft Delete ---
+async function softDeleteDemographics(id) {
+  alert('Soft deleting demographics ID: ' + id);
+
+  if (!id) {
+    alert('Missing record ID. Please try again.');
+    return;
+  }
+
+  const { data, error } = await window.supabaseClient
+    .from('demographics')
+    .update({ deleted_date: new Date().toISOString() })
+    .eq('id', id)
+    .select();
+
+  if (error) {
+    console.error('Soft delete failed:', error.message);
+    alert('Failed to remove demographics record. Please try again.');
+  } else {
+    console.log('Soft deleted row:', data);
+    alert('Demographics record removed successfully.');
+
+    // Update local state and re-render
+    delete state.usersById[id];
+    const allUsers = Object.values(state.usersById);
+    const totalUsers = allUsers.length;
+    const totalPages = Math.max(1, Math.ceil(totalUsers / state.pageSize));
+    loadResults(Math.min(state.currentPage, totalPages - 1), state.filters, state.searchTerm);
+  }
+}
+
+// --- Event Delegation for dynamic rows ---
+document.addEventListener('DOMContentLoaded', () => {
+  const resultsContainer = document.getElementById('resultsContainer');
+  if (!resultsContainer) {
+    console.warn('resultsContainer not found');
+    return;
+  }
+
+  resultsContainer.addEventListener('click', e => {
+    const target = e.target;
+    if (target && target.classList && target.classList.contains('removeBtn')) {
+      const id = target.dataset.id; // UUID from data-id
+      alert('Clicked remove button for ID: ' + id);
+      softDeleteDemographics(id);
+    }
+  });
+});
+
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await populateFilters();
@@ -436,10 +481,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Reset Filters + Search
   document.getElementById('resetFilters')?.addEventListener('click', () => {
-    document.getElementById('filterGender').value = '';
-    document.getElementById('filterZip').value = '';
-    document.getElementById('filterEducation').value = '';
-    document.getElementById('searchInput').value = '';
+    const fg = document.getElementById('filterGender');
+    const fz = document.getElementById('filterZip');
+    const fe = document.getElementById('filterEducation');
+    const si = document.getElementById('searchInput');
+    if (fg) fg.value = '';
+    if (fz) fz.value = '';
+    if (fe) fe.value = '';
+    if (si) si.value = '';
 
     loadResults(0, { gender: '', zip: '', education: '' }, '');
   });
