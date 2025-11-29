@@ -3,141 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <title>Matchmaker Results</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- important for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 1em;
-    }
-    h1 {
-      font-size: 1.2em;
-      text-align: center;
-    }
-    #filters, #searchBar {
+    body { font-family: Arial, sans-serif; margin: 1em; }
+    h1 { font-size: 1.2em; text-align: center; }
+
+    /* Search bar with square icon button */
+    #searchBar {
       display: flex;
-      flex-direction: column;
       gap: 0.5em;
       margin-bottom: 1em;
-    }
-    label {
-      font-size: 0.9em;
-    }
-    select, input, button {
-      padding: 8px;
-      font-size: 1em;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 0.85em;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: left;
-    }
-    th {
-      background-color: #f4f4f4;
-    }
-    .detailsBtn {
-      width: 100%;
-      padding: 6px;
-      font-size: 0.85em;
-    }
-    #resultsContainer {
-      overflow-x: auto; /* allow horizontal scroll if needed */
-    }
-    #paginationControls {
-      display: flex;
-      justify-content: center;
       align-items: center;
-      margin-top: 1em;
-      gap: 0.5em;
     }
-    #paginationControls button {
-      flex: 1;
-      padding: 10px;
-      font-size: 1em;
-    }
-    .filter-buttons {
-    display: flex;
-    justify-content: space-between; /* spread them out */
-    gap: 0.5em;                      /* small space between */
-    margin-top: 0.5em;
+    #searchInput { flex: 1; }
+
+    button.iconBtn {
+      width: 40px; 
+      height: 40px; 
+      padding: 0;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .filter-buttons button {
-    flex: 1;                         /* equal width */
-    padding: 10px;
-    font-size: 1em;
+    .hidden {
+      display: none !important;
     }
-    .pagination-buttons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5em;
-  margin-top: 1em;
-}
+    label { font-size: 0.9em; }
+    select, input, button { padding: 8px; font-size: 1em; width: 100%; box-sizing: border-box; }
 
-.pagination-buttons button {
-  flex: 1;
-  padding: 10px;
-  font-size: 1em;
-}
+    /* Filters panel */
+    #filtersPanel { display: flex; flex-direction: column; gap: 0.5em; margin-bottom: 1em; }
+    .filter-actions { display: flex; justify-content: space-between; gap: 0.5em; margin-top: 0.5em; }
+    .filter-actions button { flex: 1; padding: 10px; font-size: 1em; }
 
-.page-info {
-  flex: 0;
-  font-size: 0.8em;   /* smaller text */
-  color: #666;        /* subtle gray */
-  text-align: center;
-  white-space: nowrap;
-}
+    table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    .detailsBtn { width: 100%; padding: 6px; font-size: 0.85em; }
 
-</style>
+    #resultsContainer { overflow-x: auto; }
+    #paginationControls { display: flex; align-items: center; gap: 0.5em; margin-top: 1em; }
+    #paginationControls button { padding: 10px; font-size: 1em; }
+    .page-info { font-size: 0.85em; color: #666; white-space: nowrap; }
+
+
+    td.actions-cell {
+      text-align: right;       /* aligns inline content to the right */
+    }
+
+    td.actions-cell .iconBtn {
+      margin-left: auto;       /* ensures flex/grid layouts push it right */
+    }
+
+  </style>
 </head>
 <body>
   <h1>Matchmaker Results</h1>
 
   <!-- Search -->
   <div id="searchBar">
-    <label>
-      Search:
-      <input type="text" id="searchInput" placeholder="Search by name or email">
-    </label>
-    <button id="searchButton">Search</button>
+    <input type="text" id="searchInput" placeholder="Search by name or email">
+    <button id="searchButton" class="iconBtn">🔍</button>
   </div>
 
   <!-- Filters -->
-<!-- Replace your old filters div with this -->
-<div id="filtersPanel">
-    <label>Gender:</label>
+  <div id="filtersPanel">
+    <label for="filterGender">Gender:</label>
     <select id="filterGender"></select>
-  
-    <label>Zip:</label>
+
+    <label for="filterZip">Zip:</label>
     <select id="filterZip"></select>
-  
-    <label>Education:</label>
+
+    <label for="filterEducation">Education:</label>
     <select id="filterEducation"></select>
-  
-    <button id="applyFilters">Apply</button>
-    <button id="resetFilters">Reset</button>
+
+    <div class="filter-actions">
+      <button id="applyFilters">Apply</button>
+      <button id="resetFilters">Reset</button>
+    </div>
   </div>
-  
-  <!-- Add this toggle button just once, outside the panel -->
+
+  <!-- Toggle (mobile-first: filters start hidden via JS) -->
   <button id="toggleFilters">Show Filters</button>
 
-  <!-- Results Table -->
+  <!-- Results -->
   <div id="resultsContainer"></div>
 
   <!-- Pagination -->
-  <div id="paginationControls" class="pagination-buttons"></div>
+  <div id="paginationControls">
+    <button id="prevPage">Prev</button>
+    <span class="page-info" id="pageInfo">Page 1</span>
+    <button id="nextPage">Next</button>
+  </div>
 
-  <!-- Supabase UMD build + credentials + people.js -->
+  <!-- Supabase + credentials + logic -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-    // runtime sanity check: ensure supabase global is available for non-module scripts
     if (typeof supabase === 'undefined') {
       console.error('Supabase library not found. Ensure the UMD script loaded correctly.');
     }

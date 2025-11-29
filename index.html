@@ -69,9 +69,15 @@
           <input type="number" id="height_inches" name="height_inches" min="0" max="11" placeholder="0-11" style="width: 80px;" required />
         </div>
       </div>
-      <div class="form-field">
-        <label for="zip">ZIP Code</label>
-        <input type="text" id="zip" name="zip" />
+      <div class="form-field" style="display: flex; gap: 1em; align-items: flex-end;">
+        <div style="flex: 1;">
+          <label for="current_citizenship">Current Citizenship *</label>
+          <select id="current_citizenship" name="current_citizenship" required></select>
+        </div>
+        <div style="flex: 1;">
+          <label for="zip">ZIP Code</label>
+          <input type="text" id="zip" name="zip" required/>
+        </div>
       </div>
     </div>
 
@@ -82,26 +88,31 @@
         <label for="citizenship_at_birth">Citizenship at Birth *</label>
         <select id="citizenship_at_birth" name="citizenship_at_birth" required></select>
       </div>
-      <div class="form-field">
-        <label for="current_citizenship">Current Citizenship *</label>
-        <select id="current_citizenship" name="current_citizenship" required></select>
-      </div>
-      <div class="form-field">
-        <label for="highest_education_level">Highest Education Level *</label>
-        <select id="highest_education_level" name="highest_education_level" required></select>
-      </div>
-      <div class="form-field">
-        <label for="highest_education_school">School (Highest Degree) *</label>
-        <input type="text" id="highest_education_school" name="highest_education_school" required />
-      </div>
-      <div class="form-field">
-        <label for="secondary_education_level">Next Lower Education Level *</label>
-        <select id="secondary_education_level" name="secondary_education_level" required></select>
-      </div>
-      <div class="form-field">
-        <label for="secondary_education_school">School (Secondary Degree) *</label>
-        <input type="text" id="secondary_education_school" name="secondary_education_school" required />
-      </div>
+
+<div class="form-field" style="display: flex; gap: 1em; align-items: flex-end;">
+  <div style="flex: 1;">
+    <label for="highest_education_level">Highest Education Level *</label>
+    <select id="highest_education_level" name="highest_education_level" required></select>
+  </div>
+  <div style="flex: 1;">
+    <label for="highest_education_school">School (Highest Degree) *</label>
+    <input type="text" id="highest_education_school" name="highest_education_school" required />
+  </div>
+</div>
+
+
+
+<div class="form-field" style="display: flex; gap: 1em; align-items: flex-end;">
+  <div style="flex: 1;">
+    <label for="secondary_education_level">Next Lower Education Level *</label>
+    <select id="secondary_education_level" name="secondary_education_level" required></select>
+  </div>
+  <div style="flex: 1;">
+    <label for="secondary_education_school">School (Secondary Degree) *</label>
+    <input type="text" id="secondary_education_school" name="secondary_education_school" required />
+  </div>
+</div>
+
       <div class="form-field">
         <label for="education_notes">Education Notes</label>
         <textarea id="education_notes" name="education_notes" rows="4"></textarea>
