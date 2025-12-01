@@ -160,3 +160,33 @@ input.invalid, select.invalid, textarea.invalid {
   margin: 15px 0;
   font-weight: bold;
 }
+
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.radio-btn {
+  cursor: pointer;
+}
+
+.radio-btn input[type="radio"] {
+  display: none; /* hide native radio */
+}
+
+.radio-btn span {
+  display: inline-block;
+  padding: 0.4em 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  transition: all 0.2s ease;
+}
+
+.radio-btn input[type="radio"]:checked + span {
+  background-color: #0078d4;
+  color: #fff;
+  border-color: #0078d4;
+}

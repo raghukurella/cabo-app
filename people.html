@@ -58,6 +58,24 @@
       margin-left: auto;       /* ensures flex/grid layouts push it right */
     }
 
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.details-table td {
+  padding: 0.4em 0.8em;
+  vertical-align: top;
+}
+
+.details-table td:first-child {
+  font-weight: 600;
+  width: 30%; /* label column */
+  color: #333;
+}
+.details-table td:last-child {
+  width: 70%; /* value column */
+}    
   </style>
 </head>
 <body>

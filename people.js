@@ -87,6 +87,8 @@ function renderHeader() {
 }
 
 function renderRow(user, questions) {
+  console.log(user);
+
   const row = document.createElement('tr');
 
   if (user.gender) {
@@ -113,23 +115,40 @@ function renderRow(user, questions) {
   const detailsCell = document.createElement('td');
   detailsCell.colSpan = 5;
 
-  let detailsHTML = `
-    <strong>Full Name:</strong> ${fullName}<br>
-    <strong>Zip:</strong> ${user.zip || ''}<br>
-    <strong>Email:</strong> ${user.email || ''}<br>
-    <strong>Responses:</strong><br>
+let detailsHTML = `
+  <table class="details-table">
+    <tr><td>Full Name</td><td>${fullName}</td></tr>
+    <tr><td>Place of Birth</td><td>${user.place_of_birth || ''}</td></tr>
+    <tr><td>Email</td><td>${user.email || ''}</td></tr>
+    <tr><td>Phone Number</td><td>${user.phone_number || ''}</td></tr>
+    <tr><td>Date of Birth</td><td>${user.date_of_birth || ''}</td></tr>
+    <tr><td>Time of Birth</td><td>${user.time_of_birth || ''}</td></tr>
+    <tr><td>Height</td><td>${formatHeight(user.height_feet, user.height_inches)}</td></tr>
+    <tr><td>Country of Citizenship</td><td>${user.country_of_citizenship || ''}</td></tr>
+    <tr><td>Zipcode</td><td>${user.zip || ''}</td></tr>
+    <tr><td>Citizenship at Birth</td><td>${user.citizenship_at_birth || ''}</td></tr>
+    <tr><td>Highest Education</td><td>${user.education || ''} ${user.highest_degree || ''}</td></tr>
+    <tr><td>Secondary Education</td><td>${user.secondary_education || ''}</td></tr>
+    <tr><td>Secondary Degree</td><td>${user.secondary_degree || ''}</td></tr>
+    <tr><td>Education Notes</td><td>${user.education_notes || ''}</td></tr>
+    <tr><td>Previously Married</td><td>${user.previously_married ? 'Yes' : 'No'}</td></tr>
+    <tr><td>Nakshatram</td><td>${user.nakshatram || ''}</td></tr>
+    <tr><td>Raasi</td><td>${user.raasi || ''}</td></tr>
+    <tr><td>Lagnam</td><td>${user.lagnam || ''}</td></tr>
+    <tr><td>Gothram</td><td>${user.gothram || ''}</td></tr>
+  </table>
+  <div style="margin-top:1em;">
+    <strong>Responses:</strong>
     <ul>
-  `;
-  questions.forEach(q => {
-    const val = user.responses[q];
-    const display = val === null || val === undefined ? '' : val;
-    detailsHTML += `<li>${q}: ${display}</li>`;
-  });
+`;
 
-  // Embed UUID for soft delete (from demographic_id)
-  detailsHTML += `</ul>
-    <button class="removeBtn" data-id="${user.demographic_id}">🗑️ Remove</button>
-  `;
+questions.forEach(q => {
+  detailsHTML += `<li>${q}: ${user.responses[q] || ''}</li>`;
+});
+
+detailsHTML += `</ul>
+  <button class="removeBtn" data-id="${user.demographic_id}">🗑️ Remove</button>
+</div>`;
 
   detailsCell.innerHTML = detailsHTML;
   detailsRow.appendChild(detailsCell);
@@ -142,6 +161,15 @@ function renderRow(user, questions) {
   }
 
   return [row, detailsRow];
+}
+
+function formatHeight(feet, inches) {
+  if (!feet) return '';
+  // Ensure values are numbers or strings
+  const ft = feet.toString();
+  const inch = inches ? inches.toString() : '';
+
+  return inch ? `${ft}' ${inch}"` : `${ft}'`;
 }
 
 function renderBody(users, questions) {
@@ -298,20 +326,39 @@ async function hydrateResults() {
     .select('*')
     .limit(2000);
 
-  if (!error && demographics) {
-    const demographicIds = new Set(Object.keys(usersById));
-    demographics.forEach(demo => {
-      if (demographicIds.has(demo.id)) {
-        usersById[demo.id].phone_number = demo.phone_number || '';
-        usersById[demo.id].zip = demo.zip || '';
-        usersById[demo.id].date_of_birth = demo.date_of_birth || '';
-        usersById[demo.id].education = demo.highest_education_level || '';
-        if (!usersById[demo.id].email && demo.email) {
-          usersById[demo.id].email = demo.email;
-        }
+if (!error && demographics) {
+  const demographicIds = new Set(Object.keys(usersById));
+  demographics.forEach(demo => {
+    if (demographicIds.has(demo.id)) {
+      const user = usersById[demo.id];
+
+      user.phone_number = demo.phone_number || '';
+      user.zip = demo.zip || '';
+      user.date_of_birth = demo.date_of_birth || '';
+      user.time_of_birth = demo.time_of_birth || '';
+      user.place_of_birth = demo.place_of_birth || '';
+      user.height_feet = demo.height_feet || '';
+      user.height_inches = demo.height_inches || '';
+      user.country_of_citizenship = demo.country_of_citizenship || '';
+      user.citizenship_at_birth = demo.citizenship_at_birth || '';
+      user.highest_degree = demo.highest_degree || '';
+      user.secondary_education = demo.secondary_education || '';
+      user.secondary_degree = demo.secondary_degree || '';
+      user.education_notes = demo.education_notes || '';
+      user.previously_married = demo.previously_married || false;
+      user.nakshatram = demo.nakshatram || '';
+      user.raasi = demo.raasi || '';
+      user.lagnam = demo.lagnam || '';
+      user.gothram = demo.gothram || '';
+
+      // keep your existing education/email logic
+      user.education = demo.highest_education_level || '';
+      if (!user.email && demo.email) {
+        user.email = demo.email;
       }
-    });
-  }
+    }
+  });
+}
 
   state.usersById = usersById;
   state.questions = questions;

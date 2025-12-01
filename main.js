@@ -109,3 +109,111 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const feetContainer = document.getElementById('feetOptions');
+  const inchContainer = document.getElementById('inchOptions');
+
+  // Feet: 4–7
+  for (let ft = 4; ft <= 7; ft++) {
+    const label = document.createElement('label');
+    label.className = 'radio-btn';
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'heightFeet';
+    radio.value = ft;
+
+    const span = document.createElement('span');
+    span.textContent = ft; // just the number
+
+    label.appendChild(radio);
+    label.appendChild(span);
+    feetContainer.appendChild(label);
+  }
+
+  // Inches: 0–12
+  for (let inch = 0; inch <= 12; inch++) {
+    const label = document.createElement('label');
+    label.className = 'radio-btn';
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'heightInches';
+    radio.value = inch;
+
+    const span = document.createElement('span');
+    span.textContent = inch; // just the number
+
+    label.appendChild(radio);
+    label.appendChild(span);
+    inchContainer.appendChild(label);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const dropdown = document.getElementById('citizenship_at_birth');
+  if (!dropdown) return;
+
+  // 1. Fetch distinct citizenship values from demographics
+  const { data: dbCountries, error } = await window.supabaseClient
+    .from('demographics')
+    .select('citizenship_at_birth')
+    .not('citizenship_at_birth', 'is', null);
+
+  if (error) {
+    console.error('Error fetching citizenships:', error.message);
+    return;
+  }
+
+  // Normalize values (trim + proper case)
+  const dbSet = new Set(
+    (dbCountries || [])
+      .map(r => (r.citizenship_at_birth || '').trim())
+      .filter(Boolean)
+  );
+
+  // 2. Full master list of countries
+  const allCountries = [
+    "Afghanistan","Albania","Algeria","Argentina","Australia","Austria",
+    "Bangladesh","Belgium","Brazil","Canada","China","Denmark","Egypt",
+    "France","Germany","India","Italy","Japan","Mexico","Netherlands",
+    "Norway","Pakistan","Portugal","Russia","South Africa","Spain",
+    "Sweden","Switzerland","United Kingdom","United States"
+    // … add full ISO list here
+  ];
+
+  // 3. Split into two arrays
+  const dbList = allCountries.filter(c =>
+    dbSet.has(c) || dbSet.has(c.toLowerCase()) || dbSet.has(c.toUpperCase())
+  );
+  const otherList = allCountries.filter(c => !dbList.includes(c))
+    .sort((a, b) => a.localeCompare(b));
+
+  // 4. Populate dropdown
+  dropdown.innerHTML = '';
+
+  if (dbList.length) {
+    const optGroupDb = document.createElement('optgroup');
+    optGroupDb.label = 'Countries in Database';
+    dbList.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      optGroupDb.appendChild(opt);
+    });
+    dropdown.appendChild(optGroupDb);
+  }
+
+  const optGroupOther = document.createElement('optgroup');
+  optGroupOther.label = 'All Other Countries';
+  otherList.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    optGroupOther.appendChild(opt);
+  });
+  dropdown.appendChild(optGroupOther);
+});
+
