@@ -1,0 +1,73 @@
+<div class="px-6 py-4">
+  <a href="#/" class="text-blue-600 text-lg font-medium">&lt; Back</a>
+</div>
+
+<div class="flex flex-col items-center mt-4 space-y-2">
+  <h1 class="text-2xl font-semibold text-gray-800">Create Account</h1>
+  <p class="text-sm text-gray-600">Join MatchMaker</p>
+</div>
+
+<form class="mt-10 flex flex-col space-y-6 w-full max-w-sm mx-auto">
+
+  <div>
+    <label class="block text-gray-700 mb-1">Name</label>
+    <input id="name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+  </div>
+
+  <div>
+    <label class="block text-gray-700 mb-1">Email</label>
+    <input id="email" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+  </div>
+
+  <div>
+    <label class="block text-gray-700 mb-1">Password</label>
+    <input id="password" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+  </div>
+
+  <button id="signupBtn" type="button"
+    class="w-full bg-blue-600 text-white text-lg font-medium py-3 rounded-lg text-center">
+    Create Account
+  </button>
+
+</form>
+
+<script type="module">
+  const btn = document.getElementById("signupBtn");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const nameInput = document.getElementById("name");
+
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const name = nameInput.value.trim();
+
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    // ✅ Create auth user (Supabase sends verification email automatically)
+    const { data, error } = await window.supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/#/auth/callback`
+        
+      }
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    // ✅ Show confirmation message
+    alert("Check your email to confirm your account.");
+
+    // ✅ Optional: redirect to a “check your email” screen
+    window.location.hash = "#/check-email";
+  });
+</script>

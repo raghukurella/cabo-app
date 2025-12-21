@@ -1,0 +1,28 @@
+
+<div class="px-6 py-4 flex items-center justify-between">
+  <a href="#/profile" class="text-blue-600 text-lg font-medium">&lt; Back</a>
+  <button id="logoutBtn" class="text-red-600 text-sm font-medium">Log out</button>
+</div>
+
+<div class="flex flex-col items-center mt-2 space-y-1">
+  <h1 class="text-2xl font-semibold text-gray-800">More About You</h1>
+  <p class="text-sm text-gray-600 text-center">Tell us a little more</p>
+</div>
+
+<div id="status" class="mt-4 text-center text-sm text-gray-600">
+  Loading questions…
+</div>
+
+<form id="moreForm" class="mt-6 flex flex-col space-y-6 w-full max-w-sm mx-auto hidden">
+  <!-- Dynamic questions will be injected here -->
+</form>
+
+<div id="status" class="mt-4 text-center">
+  <button id="saveMoreBtn"
+    class="w-full max-w-sm mx-auto mt-6 bg-blue-600 text-white text-lg font-medium py-3 rounded-lg text-center hidden">
+    Save & Continue
+  </button>
+</div>
+
+
+<script type="module" src="./src/profile-more.js"></script>
