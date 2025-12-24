@@ -11,6 +11,7 @@ const routeTable = [
   { pattern: /^#\/security$/, page: "pages/security.html", script: null },
   { pattern: /^#\/matchmaker$/, page: "pages/matchmaker.html", script: "matchmaker.js" },
   { pattern: /^#\/admin$/, page: "pages/admin.html", script: "admin.js" },
+  { pattern: /^#\/profile$/, page: "pages/profile.html", script: null },
   { pattern: /^#\/my-profiles$/, page: "pages/my-profiles.html", script: null },
 
   // Dynamic routes
@@ -18,6 +19,7 @@ const routeTable = [
   { pattern: /^#\/profile-more\/([0-9a-fA-F-]{36})$/, page: "pages/profile-more.html", script: "profile-more.js" },
   { pattern: /^#\/profilevw\/([0-9a-fA-F-]{36})$/, page: "pages/profile-view.html", script: "profile-view.js" },
   { pattern: /^#\/menu$/, page: "pages/menu.html", script: null },
+  { pattern: /^#\/menu-manage$/, page: "pages/menu-manage.html", script: null },
 ];
 
 

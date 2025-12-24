@@ -1,6 +1,10 @@
 // Delay initialization until DOM is fully injected by the router
 setTimeout(() => initProfile(), 0);
 
+  function getTest(varX){
+    alert(varX);
+  }
+
 function initProfile() {
   // DOM elements
   const statusEl = document.getElementById("profileStatus");
@@ -22,8 +26,6 @@ function initProfile() {
   const relocateCheckbox = document.getElementById("willing_to_relocate");
   const bioInput = document.getElementById("bio");
 
-  console.log(">>> PROFILE.JS EXECUTED");
-
   // Extract /profile/<uuid>
   function getProfileId() {
     const hash = window.location.hash;
@@ -40,73 +42,72 @@ function initProfile() {
   // LOAD PROFILE
   // ------------------------------------------------------------
   async function loadProfile() {
-    console.log(">>> loadProfile entered");
-    statusEl.textContent = "Loading profile…";
+  statusEl.textContent = "Loading profile…";
 
-    const { data: sessionData, error: sessionError } =
-      await window.supabase.auth.getSession();
+  const { data: sessionData, error: sessionError } =
+    await window.supabase.auth.getSession();
 
-    if (sessionError || !sessionData?.session?.user) {
-      statusEl.textContent = "You are not logged in. Redirecting…";
-      setTimeout(() => (window.location.hash = "#/login"), 1500);
-      return;
-    }
-
-    const user = sessionData.session.user;
-    emailInput.value = user.email || "";
-
-    // CREATE MODE
-    if (!editingProfileId) {
-      statusEl.textContent = "Create a new profile.";
-      formEl.classList.remove("hidden");
-      return;
-    }
-
-    // EDIT MODE — load existing profile
-    const { data: profile, error: profileError } = await window.supabase
-      .schema("cabo")
-      .from("mm_people")
-      .select("*")
-      .eq("id", editingProfileId)
-      .maybeSingle();
-
-    if (profileError) {
-      console.error("Error loading profile:", profileError);
-      statusEl.textContent = "Error loading profile.";
-      return;
-    }
-
-    if (!profile) {
-      statusEl.textContent = "Profile not found.";
-      return;
-    }
-
-    loadedProfile = profile;
-
-    console.log("DB row id:", profile.id);
-    console.log("URL editingProfileId:", editingProfileId);
-
-    // Populate form
-    firstNameInput.value = profile.first_name || "";
-    lastNameInput.value = profile.last_name || "";
-    emailInput.value = profile.email || user.email || "";
-    phoneInput.value = profile.phone_number || "";
-    bioInput.value = profile.bio || "";
-    pobInput.value = profile.place_of_birth || "";
-    locationInput.value = profile.current_location || "";
-    heightFeetInput.value = profile.height_feet ?? "";
-    heightInchesInput.value = profile.height_inches ?? "";
-    genderSelect.value = profile.gender || "";
-    relocateCheckbox.checked = profile.willing_to_relocate === true;
-
-    if (profile.datetime_of_birth) {
-      const d = new Date(profile.datetime_of_birth);
-      dobInput.value = !isNaN(d) ? d.toISOString().slice(0, 16) : "";
-    }
-
-    statusEl.textContent = "";
-    formEl.classList.remove("hidden");
+  if (sessionError || !sessionData?.session?.user) {
+    statusEl.textContent = "You are not logged in. Redirecting…";
+    setTimeout(() => (window.location.hash = "#/login"), 1500);
+    return;
   }
+
+  // CREATE MODE
+  if (!editingProfileId) {
+    statusEl.textContent = "Create a new profile.";
+    formEl.classList.remove("hidden");
+    return;
+  }
+
+  // EDIT MODE — load existing profile
+  const { data: profile, error: profileError } = await window.supabase
+    .schema("cabo")
+    .from("mm_people")
+    .select("*")
+    .eq("id", editingProfileId)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Error loading profile:", profileError);
+    statusEl.textContent = "Error loading profile.";
+    return;
+  }
+
+  if (!profile) {
+    statusEl.textContent = "Profile not found.";
+    return;
+  }
+
+  loadedProfile = profile;
+
+  console.log("DB row id:", profile.id);
+  console.log("URL editingProfileId:", editingProfileId);
+
+  // Populate form with profile values only
+  firstNameInput.value = profile.first_name || "";
+  lastNameInput.value = profile.last_name || "";
+  emailInput.value = profile.email || "";   // 👈 editable profile email
+  phoneInput.value = profile.phone_number || "";
+  bioInput.value = profile.bio || "";
+  pobInput.value = profile.place_of_birth || "";
+  locationInput.value = profile.current_location || "";
+  heightFeetInput.value = profile.height_feet ?? "";
+  heightInchesInput.value = profile.height_inches ?? "";
+  genderSelect.value = profile.gender || "";
+  relocateCheckbox.checked = profile.willing_to_relocate === true;
+
+  if (profile.datetime_of_birth) {
+    const d = new Date(profile.datetime_of_birth);
+    dobInput.value = !isNaN(d) ? d.toISOString().slice(0, 16) : "";
+  }
+
+  statusEl.textContent = "";
+  formEl.classList.remove("hidden");
+
+  photoUrls = profile.photos || [];
+  renderPhotoSlots();
+}
 
   // ------------------------------------------------------------
   // PAYLOAD BUILDERS
@@ -129,6 +130,7 @@ function initProfile() {
       height_inches:
         heightInchesInput.value === "" ? null : Number(heightInchesInput.value),
       datetime_of_birth: dobInput.value || null,
+      photos: photoUrls, // store array of URLs
     };
   }
 
@@ -148,6 +150,8 @@ function initProfile() {
       height_inches:
         heightInchesInput.value === "" ? null : Number(heightInchesInput.value),
       datetime_of_birth: dobInput.value || null,
+      photos: photoUrls,
+
     };
   }
 
@@ -230,4 +234,139 @@ function initProfile() {
     window.location.hash = "#/login";
   });
 
+
+
+
+
+// ------------------------------
+// PHOTO UPLOAD LOGIC
+// ------------------------------
+const photoGrid = document.getElementById("photoGrid");
+const photoInput = document.getElementById("photoInput");
+
+let photoUrls = []; // store Supabase public URLs
+
+function renderPhotoSlots(photoUrls = []) {
+  const photoGrid = document.getElementById("photoGrid");
+  const photoInput = document.getElementById("photoInput");
+
+  photoGrid.innerHTML = "";
+
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement("div");
+    slot.className =
+      "relative w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer overflow-hidden";
+
+    const value = photoUrls[i] || null;
+    console.log("Thumbnail URL:", value);
+
+    if (value && value !== "__uploading__") {
+      slot.innerHTML = `
+        <img src="${value}" class="w-full h-full object-cover" />
+        <button 
+          class="absolute top-1 right-1 bg-black bg-opacity-60 text-white text-xs px-1 rounded delete-btn"
+          data-index="${i}"
+        >
+          ✕
+        </button>
+      `;
+    } else if (value === "__uploading__") {
+      slot.innerHTML = `
+        <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-700 text-sm">
+          Uploading...
+        </div>
+      `;
+    } else {
+      slot.textContent = "+";
+    }
+
+    slot.addEventListener("click", (e) => {
+      if (e.target.classList.contains("delete-btn")) return;
+
+      if (value && value !== "__uploading__") {
+        const modal = document.getElementById("photoModal");
+        const modalImage = document.getElementById("modalImage");
+
+        modalImage.src = value;
+        modal.classList.remove("hidden");
+        return;
+      }
+
+      photoInput.dataset.slot = i;
+      photoInput.click();
+    });
+
+    photoGrid.appendChild(slot);
+  }
+
+  photoGrid.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const index = Number(e.target.dataset.index);
+      photoUrls[index] = null;
+      renderPhotoSlots(photoUrls);
+      e.stopPropagation();
+    });
+  });
 }
+
+
+// FILE UPLOAD HANDLER
+photoInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const slotIndex = Number(photoInput.dataset.slot);
+
+  // Temporary uploading placeholder
+  photoUrls[slotIndex] = "__uploading__";
+  renderPhotoSlots();
+
+  // Get the logged-in user (fixes "user is not defined")
+  const { data: sessionData } = await window.supabase.auth.getSession();
+  const user = sessionData.session.user;
+
+  // File path inside bucket
+  const fileName = `${user.id}/${crypto.randomUUID()}.jpg`;
+
+  // Upload file (note: onUploadProgress only works in browsers that support it)
+  const { data, error } = await window.supabase.storage
+    .from("profile_photos")
+    .upload(fileName, file, {
+      upsert: false,
+      onUploadProgress: (progressEvent) => {
+        const percent = Math.round(
+          (progressEvent.loaded / progressEvent.total) * 100
+        );
+        showUploadProgress(slotIndex, percent);
+      },
+    });
+
+  if (error) {
+    console.error("Upload error:", error);
+    alert("Upload failed");
+    photoUrls[slotIndex] = null;
+    renderPhotoSlots();
+    return;
+  }
+
+  // Get the PUBLIC URL (fixes 400 Bad Request)
+  const { data: urlData } = window.supabase.storage
+    .from("profile_photos")
+    .getPublicUrl(fileName);
+
+  // Save the public URL
+  photoUrls[slotIndex] = urlData.publicUrl;
+
+  renderPhotoSlots();
+});photos: photoUrls,
+
+
+function showUploadProgress(index, percent) {
+  const slot = photoGrid.children[index];
+  slot.innerHTML = `
+    <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-700 text-sm">
+      ${percent}%
+    </div>
+  `;
+}
+}   

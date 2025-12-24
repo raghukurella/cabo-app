@@ -12,17 +12,23 @@
   </div>
 </div>
 
-<div id="profileContainer" class="max-w-xl mx-auto mt-6 space-y-4">
-  Loading… 
+<!-- Profile details -->
+<div id="profileContainer" class="max-w-2xl mx-auto mt-6 hidden">
+  <table class="w-full border border-gray-300 rounded-lg shadow-sm">
+    <tbody id="profileTable">
+      <!-- Profile rows will be injected dynamically -->
+    </tbody>
+  </table>
 </div>
 
-<div id="qaContainer" class="max-w-xl mx-auto mt-10 space-y-4">
-  Loading questions…
+<!-- Questions & Answers -->
+<div id="qaContainer" class="max-w-2xl mx-auto mt-10 hidden">
+  <h2 class="text-xl font-semibold text-gray-800 mb-4">More About You</h2>
+  <table class="w-full border border-gray-300 rounded-lg shadow-sm">
+    <tbody id="qaTable">
+      <!-- Q&A rows will be injected dynamically -->
+    </tbody>
+  </table>
 </div>
-
-
-<div id="qaContainer"></div>
-
 
 <script type="module" src="./src/profile-view.js"></script>
-

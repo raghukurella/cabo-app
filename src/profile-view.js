@@ -1,5 +1,4 @@
-// REMOVE ALL REGEX EXTRACTION
-// REMOVE setTimeout(() => initProfileView(), 0);
+// profile-view.js
 
 export function init(profileId) {
   console.log("INIT PROFILE VIEW WITH ID:", profileId);
@@ -25,6 +24,7 @@ function initProfileView(profileId) {
 
   if (!profileId) {
     container.textContent = "Invalid profile.";
+    container.classList.remove("hidden");
     return;
   }
 
@@ -43,25 +43,29 @@ function initProfileView(profileId) {
       .maybeSingle();
 
     if (error || !profile) {
+      console.error("Supabase profile error:", error);
       container.textContent = "Profile not found.";
+      container.classList.remove("hidden");
       return;
     }
 
     container.innerHTML = `
-      <h1 class="text-2xl font-semibold">${profile.first_name} ${profile.last_name}</h1>
-
-      <div class="space-y-2 text-gray-700">
-        <p><strong>Email:</strong> ${profile.email}</p>
-        <p><strong>Phone:</strong> ${profile.phone_number ?? ""}</p>
-        <p><strong>Date of Birth:</strong> ${profile.datetime_of_birth ?? ""}</p>
-        <p><strong>Place of Birth:</strong> ${profile.place_of_birth ?? ""}</p>
-        <p><strong>Location:</strong> ${profile.current_location ?? ""}</p>
-        <p><strong>Gender:</strong> ${profile.gender ?? ""}</p>
-        <p><strong>Height:</strong> ${profile.height_feet ?? ""} ft ${profile.height_inches ?? ""} in</p>
-        <p><strong>Willing to Relocate:</strong> ${profile.willing_to_relocate ? "Yes" : "No"}</p>
-        <p><strong>Bio:</strong> ${profile.bio ?? ""}</p>
-      </div>
+      <h1 class="text-2xl font-semibold mb-4">${profile.first_name} ${profile.last_name}</h1>
+      <table class="w-full border border-gray-300 rounded-lg shadow-sm">
+        <tbody>
+          <tr><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Date of Birth</td><td class="border px-4 py-2">${profile.datetime_of_birth ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Place of Birth</td><td class="border px-4 py-2">${profile.place_of_birth ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Location</td><td class="border px-4 py-2">${profile.current_location ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Gender</td><td class="border px-4 py-2">${profile.gender ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Height</td><td class="border px-4 py-2">${profile.height_feet ?? ""} ft ${profile.height_inches ?? ""} in</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Willing to Relocate</td><td class="border px-4 py-2">${profile.willing_to_relocate ? "Yes" : "No"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Bio</td><td class="border px-4 py-2">${profile.bio ?? "-"}</td></tr>
+        </tbody>
+      </table>
     `;
+    container.classList.remove("hidden"); // <-- show it
   }
 
   // ------------------------------------------------------------
@@ -75,7 +79,9 @@ function initProfileView(profileId) {
       .order("sort_order", { ascending: true });
 
     if (qErr) {
+      console.error("Supabase questions error:", qErr);
       qaContainer.textContent = "Error loading questions.";
+      qaContainer.classList.remove("hidden");
       return;
     }
 
@@ -86,7 +92,9 @@ function initProfileView(profileId) {
       .eq("person_id", profileId);
 
     if (aErr) {
+      console.error("Supabase answers error:", aErr);
       qaContainer.textContent = "Error loading answers.";
+      qaContainer.classList.remove("hidden");
       return;
     }
 
@@ -95,20 +103,21 @@ function initProfileView(profileId) {
       answerMap[a.question_id] = a.answer_text;
     });
 
-qaContainer.innerHTML = `
-  <h2 class="text-xl font-semibold mb-4">Questions & Answers</h2>
-
-  <div class="qa-grid">
-    ${questions.map(q => `
-      <div class="qa-item">
-        <div class="qa-question">${q.question_text}</div>
-        <div class="qa-answer">
-          ${answerMap[q.id] ?? "<em>No answer provided</em>"}
-        </div>
-      </div>
-    `).join("")}
-  </div>
-`;  }
+    qaContainer.innerHTML = `
+      <h2 class="text-xl font-semibold mb-4">Questions & Answers</h2>
+      <table class="w-full border border-gray-300 rounded-lg shadow-sm">
+        <tbody>
+          ${questions.map(q => `
+            <tr>
+              <td class="border px-4 py-2 font-medium w-1/3">${q.question_text}</td>
+              <td class="border px-4 py-2">${answerMap[q.id] ?? "<em>No answer provided</em>"}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+    qaContainer.classList.remove("hidden"); // <-- show it
+  }
 
   // ------------------------------------------------------------
   // BUTTONS
