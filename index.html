@@ -7,16 +7,53 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
+
+<header class="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+  <!-- Left: Logo -->
+  <div class="flex items-center gap-2">
+    <img src="assets/logo.png" alt="Matchmaker logo" class="w-10 h-10" />
+    <span class="font-bold text-lg tracking-wide">MATCHMAKER</span>
+  </div>
+
+  <!-- Hamburger button (mobile only) -->
+  <button id="menuToggle" class="md:hidden text-gray-700 text-2xl focus:outline-none">
+    ☰
+  </button>
+
+  <!-- Right: Navigation links -->
+  <nav id="mainMenu" class="hidden md:flex gap-6 text-red-600 font-medium">
+    <a href="#/my-profiles">My Profiles</a>
+    <a href="#/logout">Log out</a>
+    <a href="#/home" class="text-blue-600">&lt; home</a>
+  </nav>
+</header>
+
+<!-- Mobile dropdown -->
+<nav id="mobileMenu" class="hidden flex-col bg-white border-b border-gray-200 px-4 py-3 md:hidden">
+  <a href="#/home" class="py-1 text-blue-600">home</a>
+  <a href="#/my-profiles" class="py-1 text-blue-600">my profiles</a>
+  <a href="#/logout" class="py-1 text-red-600">log out</a>
+</nav>
+
+
+
+
 <body class="bg-gray-50 min-h-screen">
-<!-- Global Header -->
-<div id="global-header" class="w-full flex items-center px-4 py-2 space-x-2">
-  <img src="assets/logo.png" class="w-16 h-16" />
-  <span class="text-sm font-semibold text-gray-700"></span>
-</div>
+
 
 <!-- Routed content -->
-  <div id="app"></div>
+<div id="app"></div>
 <script type="module" src="./src/supabase.js"></script>
 <script type="module" src="./src/router.js"></script>
+
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
+
+  toggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+</script>
+
 </body>
 </html>

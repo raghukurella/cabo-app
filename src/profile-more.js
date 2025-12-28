@@ -5,7 +5,7 @@
   const formEl = document.getElementById("moreForm");
   const saveBtn = document.getElementById("saveMoreBtn");
   const logoutBtn = document.getElementById("logoutBtn");
-console.log(">>> PROFILE-MORE.JS EXECUTED");
+
   let questions = [];
   let existingAnswers = {};
 
@@ -41,16 +41,16 @@ const editingProfileId = getProfileId();
       .select("*")
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
-console.log(qError);
-    if (qError) {
-      console.error(qError);
-      statusEl.textContent = "Failed to load questions.";
-      return;
-    }
+
+      if (qError) {
+        console.error(qError);
+        statusEl.textContent = "Failed to load questions.";
+        return;
+      }
 
     questions = qData;
 
-console.log ("user_id:", user.id);
+    //console.log ("user_id:", user.id);
 
     // ✅ Fetch existing answers for this user
     const { data: aData, error: aError } = await supabase

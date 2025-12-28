@@ -334,3 +334,90 @@ form input {
   border: 1px solid #e5e5e5;   /* makes cards visually distinct */
   background: #fff;
 }
+
+
+/* --------------------Top Bar ------------------------- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6em 1em;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.logo-icon {
+  height: 24px;
+  width: auto;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.1em;
+  color: #222;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1em;
+}
+
+.nav-links a {
+  color: #d83b01;
+  font-weight: 500;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.subnav {
+  padding: 0.4em 1em;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.home-link {
+  color: #0078d7;
+  font-weight: 500;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5em;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    gap: 0.8em;
+  }
+
+  .logo-text {
+    font-size: 1em;
+  }
+
+  .nav-links a,
+  .home-link {
+    font-size: 0.85em;
+  }
+}
+
+/* -----------------------End Top Bar---------------------- */
+

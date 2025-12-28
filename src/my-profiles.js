@@ -9,13 +9,23 @@ async function loadProfiles() {
 //console.log("User ID:", user.id);
 console.log("profilesList:", document.getElementById("profilesList"));
 console.log("User ID at loadProfiles:", user.id);
-  const { data: profiles, error } = await supabase
-    .schema("cabo")
-    .from("mm_people")
-    .select("*")
-    .eq("auth_id", user.id)
-    .order("created_at", { ascending: true });
-
+const { data: profiles, error } = await supabase
+  .schema("cabo")
+  .from("mm_people")
+  .select(`
+    *,
+    mm_answers (
+      id,
+      answer_text,
+      question_id,
+      mm_questions (
+        id,
+        question_text
+      )
+    )
+  `)
+  .eq("auth_id", user.id)
+  .order("created_at", { ascending: true });
   const container = document.getElementById("profilesList");
   if (!container) return;
 
@@ -31,26 +41,42 @@ console.log("User ID at loadProfiles:", user.id);
     return;
   }
 
-  profiles.forEach(profile => {
-    const card = document.createElement("div");
-card.className = `
-  bg-white border border-gray-200 rounded-xl p-4 
-  hover:shadow-lg hover:-translate-y-0.5 transition-all
-`;
-const displayName = `${profile.last_name || ""}${profile.last_name && profile.first_name ? ", " : ""}${profile.first_name || ""}`.trim() || "Unnamed Profile";
-card.innerHTML = `
-  <p class="text-base font-semibold text-gray-800 leading-tight">
-    ${displayName}
-  </p>
-  <p class="text-sm text-gray-600 leading-tight">${profile.current_location || ""}</p>
-  <p class="text-sm text-blue-600 font-medium mt-1">Edit Profile →</p>
-`;
-    card.addEventListener("click", () => {
-      window.location.hash = `#/profilevw/${profile.id}`;
-    });
+profiles.forEach(profile => {
+  const card = document.createElement("div");
+  card.className = `
+    bg-white border border-gray-200 rounded-xl p-4 
+    hover:shadow-lg hover:-translate-y-0.5 transition-all
+  `;
 
-    container.appendChild(card);
+  const displayName = `${profile.last_name || ""}${profile.last_name && profile.first_name ? ", " : ""}${profile.first_name || ""}`.trim() || "Unnamed Profile";
+
+  const age = calculateAge(profile.datetime_of_birth);
+  const ageText = age ? ` (${age})` : "";
+
+  card.innerHTML = `
+    <p class="text-base font-semibold text-gray-800 leading-tight">
+      ${displayName}${ageText}
+    </p>
+    <p class="text-sm text-gray-600 leading-tight">
+      ${profile.current_location || ""}
+    </p>
+  `;
+
+  card.addEventListener("click", () => {
+    window.location.hash = `#/profilevw/${profile.id}`;
   });
+
+  container.appendChild(card);
+});
+}
+
+function calculateAge(dobString) {
+  if (!dobString) return null;
+  const dob = new Date(dobString);
+  if (isNaN(dob)) return null;
+  const diff = Date.now() - dob.getTime();
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
 function initMyProfiles() {

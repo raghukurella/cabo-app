@@ -1,8 +1,6 @@
 // profile-view.js
 
 export function init(profileId) {
-  console.log("INIT PROFILE VIEW WITH ID:", profileId);
-
   requestAnimationFrame(() => {
     initProfileView(profileId);
   });
@@ -13,9 +11,6 @@ function initProfileView(profileId) {
   const qaContainer = document.getElementById("qaContainer");
   const editBtn = document.getElementById("editBtn");
   const printBtn = document.getElementById("printBtn");
-
-  console.log("profile-view.js loaded");
-  console.log("Received profileId:", profileId);
 
   if (!container) {
     console.error("profileContainer not found in DOM");
@@ -29,8 +24,7 @@ function initProfileView(profileId) {
   }
 
   loadProfile(profileId);
-  loadQuestionsAndAnswers(profileId);
-
+  
   // ------------------------------------------------------------
   // LOAD PROFILE (read-only)
   // ------------------------------------------------------------
@@ -49,29 +43,8 @@ function initProfileView(profileId) {
       return;
     }
 
-    container.innerHTML = `
-      <h1 class="text-2xl font-semibold mb-4">${profile.first_name} ${profile.last_name}</h1>
-      <table class="w-full border border-gray-300 rounded-lg shadow-sm">
-        <tbody>
-          <tr><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Date of Birth</td><td class="border px-4 py-2">${profile.datetime_of_birth ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Place of Birth</td><td class="border px-4 py-2">${profile.place_of_birth ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Location</td><td class="border px-4 py-2">${profile.current_location ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Gender</td><td class="border px-4 py-2">${profile.gender ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Height</td><td class="border px-4 py-2">${profile.height_feet ?? ""} ft ${profile.height_inches ?? ""} in</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Willing to Relocate</td><td class="border px-4 py-2">${profile.willing_to_relocate ? "Yes" : "No"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Bio</td><td class="border px-4 py-2">${profile.bio ?? "-"}</td></tr>
-        </tbody>
-      </table>
-    `;
-    container.classList.remove("hidden"); // <-- show it
-  }
+    const age = computeAge(profile.datetime_of_birth);
 
-  // ------------------------------------------------------------
-  // LOAD QUESTIONS + ANSWERS
-  // ------------------------------------------------------------
-  async function loadQuestionsAndAnswers(profileId) {
     const { data: questions, error: qErr } = await window.supabase
       .schema("cabo")
       .from("mm_questions")
@@ -103,10 +76,27 @@ function initProfileView(profileId) {
       answerMap[a.question_id] = a.answer_text;
     });
 
-    qaContainer.innerHTML = `
-      <h2 class="text-xl font-semibold mb-4">Questions & Answers</h2>
+    container.innerHTML = `
+      <h1 class="text-2xl font-semibold mb-4" align="center">
+      ${profile.first_name} ${profile.last_name}
+      (${age !== null ? age + " yrs" : "Age N/A"})
+      </h1>
       <table class="w-full border border-gray-300 rounded-lg shadow-sm">
         <tbody>
+          <tr><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
+          
+<tr>
+  <td class="border px-4 py-2 font-medium">Date of Birth</td>
+  <td class="border px-4 py-2">${formatDateTime(profile.datetime_of_birth)}</td>
+</tr>
+
+          <tr><td class="border px-4 py-2 font-medium">Place of Birth</td><td class="border px-4 py-2">${profile.place_of_birth ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Location</td><td class="border px-4 py-2">${profile.current_location ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Gender</td><td class="border px-4 py-2">${profile.gender ?? "-"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Height</td><td class="border px-4 py-2">${profile.height ?? ""}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Willing to Relocate</td><td class="border px-4 py-2">${profile.willing_to_relocate ? "Yes" : "No"}</td></tr>
+          <tr><td class="border px-4 py-2 font-medium">Bio</td><td class="border px-4 py-2">${profile.bio ?? "-"}</td></tr>
           ${questions.map(q => `
             <tr>
               <td class="border px-4 py-2 font-medium w-1/3">${q.question_text}</td>
@@ -115,9 +105,44 @@ function initProfileView(profileId) {
           `).join("")}
         </tbody>
       </table>
+      <p>&nbsp;</p>
     `;
-    qaContainer.classList.remove("hidden"); // <-- show it
+    container.classList.remove("hidden"); // <-- show it
   }
+
+
+//------------------------------------------------------------
+function formatDateTime(isoString) {
+  if (!isoString) return "-";
+  const date = new Date(isoString);
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12; // convert 0 → 12
+
+  return `${yyyy}-${mm}-${dd} ${hours}:${minutes} ${ampm}`;
+}
+//------------------------------------------------------------
+
+
+function computeAge(dob) {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  // Report age in current year (your original behavior)
+  return age + 1;
+}
 
   // ------------------------------------------------------------
   // BUTTONS

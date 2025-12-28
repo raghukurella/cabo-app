@@ -1,10 +1,3 @@
-<div class="px-4 py-2 flex items-center justify-between">
-  <a href="#/" class="text-blue-600 text-base font-medium">&lt; home</a>
-  <div class="flex space-x-2">
-    <button id="myProfiles" class="text-red-600 text-xs font-medium">My Profiles</button>
-    <button id="logoutBtn" class="text-red-600 text-xs font-medium">Log out</button>
-  </div>
-</div>
 
 <div class="flex flex-col items-center mt-2 space-y-1">
   <h1 class="text-xl font-semibold text-gray-800">My Profile</h1>
@@ -17,117 +10,152 @@
 
 <form id="profileForm" class="mt-4 flex flex-col space-y-2 w-full max-w-sm mx-auto hidden">
 
-  <!-- First name -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">First name</label>
-    <input id="first_name" type="text"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-  </div>
-
-  <!-- Last name -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Last name</label>
-    <input id="last_name" type="text"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-  </div>
-
-<!-- Email (editable, saved in profile table) -->
-<div>
-  <label class="block text-gray-700 text-sm mb-1">Email</label>
-  <input id="email" type="email"
-    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-  />
-</div>
-
-  <!-- Phone -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Phone number</label>
-    <input id="phone_number" type="tel"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-  </div>
-
-  <!-- Date/time of birth -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Date & Time of Birth</label>
-    <input id="datetime_of_birth" type="datetime-local"
-      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900" />
-  </div>
-
-  <!-- Place of birth -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Place of birth</label>
-    <input id="place_of_birth" type="text"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-  </div>
-
-  <!-- Height (grid layout) -->
-  <div class="grid grid-cols-2 gap-2">
-    <div>
-      <label class="block text-gray-700 text-sm mb-1">Height (feet)</label>
-      <input id="height_feet" type="number" min="0"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-    </div>
-    <div>
-      <label class="block text-gray-700 text-sm mb-1">Height (inches)</label>
-      <input id="height_inches" type="number" min="0" max="11"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+  <!-- Accordion: Basic Info -->
+  <div class="border rounded">
+    <button type="button" onclick="toggleAccordion('section1')"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+      Basic Info <span id="icon-section1">+</span>
+    </button>
+    <div id="section1" class="hidden px-3 py-2 space-y-2">
+      <!-- First name -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">First name</label>
+        <input id="first_name" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+      </div>
+      <!-- Last name -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Last name</label>
+        <input id="last_name" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+      </div>
+      <!-- Email -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Email</label>
+        <input id="email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+      </div>
+      <!-- Phone -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Phone number</label>
+        <input id="phone_number" type="tel" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+      </div>
+      <!-- Gender -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Gender</label>
+        <select id="gender" class="w-full border rounded-lg px-3 py-2 text-sm bg-white" required>
+          <option value="">Select…</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Non-binary">Non‑binary</option>
+        </select>
+      </div>
+      <!-- DOB -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Date & Time of Birth</label>
+        <input id="datetime_of_birth" type="datetime-local"
+          class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+      </div>
     </div>
   </div>
 
-  <!-- Gender -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Gender</label>
-    <select id="gender"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-      <option value="">Select…</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-      <option value="Non-binary">Non‑binary</option>
-    </select>
+  <!-- Accordion: Location & Details -->
+  <div class="border rounded">
+    <button type="button" onclick="toggleAccordion('section2')"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+      Location & Details <span id="icon-section2">+</span>
+    </button>
+    <div id="section2" class="hidden px-3 py-2 space-y-2">
+      <!-- Height -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Height</label>
+        <select id="height" class="w-full border rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">Select…</option>
+        </select>
+      </div>
+      <!-- Place of birth -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Place of birth</label>
+        <input id="place_of_birth" type="text" class="w-full border rounded-lg px-3 py-2 text-sm"/>
+      </div>
+      <!-- Current location -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Current location</label>
+        <input id="current_location" type="text" class="w-full border rounded-lg px-3 py-2 text-sm"/>
+      </div>
+      <!-- Citizenship -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Country of Citizenship</label>
+        <input id="citizenship" type="text" class="w-full border rounded-lg px-3 py-2 text-sm"/>
+      </div>
+      <!-- Relocate -->
+      <div class="flex items-center space-x-2">
+        <input id="willing_to_relocate" type="checkbox"
+          class="h-4 w-4 text-blue-600 border-gray-300 rounded"/>
+        <label for="willing_to_relocate" class="text-gray-700 text-sm">I am willing to relocate</label>
+      </div>
+    </div>
   </div>
 
-  <!-- Current location -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Current location</label>
-    <input id="current_location" type="text"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+  <!-- Accordion: Photos -->
+  <div class="border rounded">
+    <button type="button" onclick="toggleAccordion('section3')"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+      Photos <span id="icon-section3">+</span>
+    </button>
+    <div id="section3" class="hidden px-3 py-2 space-y-2">
+      <label class="block text-gray-700 text-sm mb-1">Photos (up to 6)</label>
+      <div id="photoGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      <input id="photoInput" type="file" accept="image/*" class="hidden"/>
+      <div id="photoModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50">
+        <img id="modalImage" class="max-w-full max-h-full rounded-lg"/>
+      </div>
+    </div>
   </div>
-
-  <!-- Willing to relocate -->
-  <div class="flex items-center space-x-2">
-    <input id="willing_to_relocate" type="checkbox"
-      class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-    <label for="willing_to_relocate" class="text-gray-700 text-sm">
-      I am willing to relocate
-    </label>
-  </div>
-
-  <!-- Bio -->
-  <div>
+<!-- Accordion: Bio -->
+<div class="border rounded">
+  <button type="button"
+    class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300"
+    onclick="toggleAccordion('sectionBio')">
+    Bio
+    <span id="icon-sectionBio">+</span>
+  </button>
+  <div id="sectionBio" class="hidden px-3 py-2 space-y-2">
     <label class="block text-gray-700 text-sm mb-1">Bio</label>
     <textarea id="bio" rows="3"
       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
   </div>
+</div>
 
-  <!-- Photos -->
-  <div>
-    <label class="block text-gray-700 text-sm mb-1">Photos (up to 6)</label>
-    <div id="photoGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-      <!-- JS will populate slots -->
+  <!-- Accordion: Questions -->
+  <div class="border rounded">
+    <button type="button" onclick="toggleAccordion('section4')"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+      Questions <span id="icon-section4">+</span>
+    </button>
+    <div id="section4" class="hidden px-3 py-2 space-y-2">
+      <div id="questionsWrapper" class="space-y-4"></div>
     </div>
-    <input id="photoInput" type="file" accept="image/*" class="hidden" />
   </div>
 
-  <!-- Modal -->
-  <div id="photoModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50">
-    <img id="modalImage" class="max-w-full max-h-full rounded-lg" />
+
+  <!-- Accordion: Preferences -->
+  <div class="border rounded">
+    <button type="button" onclick="toggleAccordion('sectionPreferences')"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+      Preferences <span id="icon-sectionPreferences">+</span>
+    </button>
+    <div id="sectionPreferences" class="hidden px-3 py-2 space-y-2">
+      <div id="preferencesWrapper" class="space-y-4"></div>
+    </div>
   </div>
 
-  <!-- Save button -->
+  <!-- Save button at the bottom -->
   <button id="saveProfileBtn" type="button"
     class="w-full bg-blue-600 text-white text-base font-medium py-2 rounded-lg">
-    Next &raquo;
+    Save Profile
+  </button>
+  <button id="cancelProfileBtn" type="button" 
+    class="w-full bg-gray-600 text-white text-base font-medium py-2 rounded-lg">
+    Cancel
   </button>
 </form>
 
-<script type="module" src="./src/profile.js"></script>
+<script type="module" src="./src/profile_main.js"></script>
