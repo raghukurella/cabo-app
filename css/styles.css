@@ -1,0 +1,423 @@
+/* Base reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, Roboto, sans-serif;
+}
+
+body {
+  background: #f9f9f9;
+  color: #333;
+  line-height: 1.5;
+  padding: 1.5em;
+}
+
+/* Headings */
+h1 {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 1.8em;
+  color: #222;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.nav a {
+  color: #0078d7;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Form container */
+form {
+  max-width: 420px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 1.2em;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Compact form layout */
+.compact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+/* Fieldset grouping */
+fieldset {
+  border: 1px solid #ddd;
+  padding: 0.9em;
+  border-radius: 6px;
+  margin-bottom: 1em;
+}
+
+legend {
+  padding: 0 0.4em;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Form groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em; /* ✅ perfect spacing: compact but readable */
+}
+
+form label {
+  font-weight: 500; /* ✅ softer, modern look */
+  font-size: 0.9em;
+  color: #444;
+}
+
+/* Inputs */
+form input {
+  padding: 0.6em 0.75em; /* ✅ tuned for mobile + your font stack */
+  font-size: 0.95em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+/* Two-column layout for height fields */
+.row {
+  display: flex;
+  gap: 1em;
+}
+
+.col {
+  flex: 1;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.9em 1.2em;
+  font-size: 1em;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease;
+  width: 100%;
+  margin-top: 0.5em;
+}
+
+.btn-primary {
+  background: #0078d7;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #005fa3;
+}
+
+.btn-neutral {
+  background: #eee;
+  color: #333;
+}
+
+.btn-neutral:hover {
+  background: #ddd;
+}
+
+.btn-danger {
+  background: #d83b01;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #a52a00;
+}
+
+/* Table styles */
+.details-table,
+#peopleTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.details-table td,
+#peopleTable th,
+#peopleTable td {
+  padding: 0.6em;
+  border-bottom: 1px solid #ddd;
+}
+
+#peopleTable th {
+  background: #f0f0f0;
+  font-weight: 600;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  body {
+    padding: 1em;
+  }
+
+  form {
+    padding: 1em;
+  }
+
+  form input,
+  .btn {
+    font-size: 1.05em;
+    padding: 1em;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+}
+
+
+form input {
+  padding: 0.45em 0.65em;   /* shorter height */
+  font-size: 0.9em;         /* slightly smaller text */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+.height-combo {
+  display: flex;
+  gap: 0.6em;
+}
+
+.height-combo input {
+  flex: 1;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: -0.5em;
+  margin-bottom: 1.5em;
+  color: #666;
+  font-size: 0.9em;
+}
+
+
+.person-selected {
+  background-color: #e0f2fe; /* light blue */
+  border-color: #38bdf8;     /* blue border */
+}
+
+
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+}
+
+
+/* --------------------------------------------- */
+/* Two‑column Q&A layout for profile-view page   */
+/* --------------------------------------------- */
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2em; /* matches your form spacing rhythm */
+  margin-top: 1.5em;
+}
+
+.qa-item {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.8em;
+}
+
+.qa-question {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 0.25em;
+}
+
+.qa-answer {
+  color: #555;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+/* Collapse to one column on mobile */
+@media (max-width: 700px) {
+  .qa-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print-friendly two-column layout */
+@media print {
+  .qa-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+}
+/* --------------------------------------------- */
+
+
+/* Menu page layout */
+.menu-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1em;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+}
+
+/* Card style similar to my-profiles */
+.menu-card {
+  background: #fff;
+  padding: 1.2em;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.menu-card h2 {
+  font-size: 1.2em;
+  margin-bottom: 0.3em;
+  color: #222;
+}
+
+.menu-card p {
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* Two columns on tablets */
+@media (min-width: 700px) {
+  .menu-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+
+/* --------------------------------------------- */
+/* FIX MENU PAGE SPACING + CARD VISIBILITY       */
+/* --------------------------------------------- */
+
+#app .menu-container {
+  padding: 0;              /* remove double padding */
+  margin-top: 1em;         /* give breathing room */
+}
+
+#app .menu-grid {
+  margin-top: 1em;         /* spacing below header */
+}
+
+#app .menu-card {
+  border: 1px solid #e5e5e5;   /* makes cards visually distinct */
+  background: #fff;
+}
+
+
+/* --------------------Top Bar ------------------------- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6em 1em;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.logo-icon {
+  height: 24px;
+  width: auto;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.1em;
+  color: #222;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1em;
+}
+
+.nav-links a {
+  color: #d83b01;
+  font-weight: 500;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.subnav {
+  padding: 0.4em 1em;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.home-link {
+  color: #0078d7;
+  font-weight: 500;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5em;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    gap: 0.8em;
+  }
+
+  .logo-text {
+    font-size: 1em;
+  }
+
+  .nav-links a,
+  .home-link {
+    font-size: 0.85em;
+  }
+}
+
+/* -----------------------End Top Bar---------------------- */
+

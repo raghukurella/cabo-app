@@ -1,0 +1,75 @@
+<!-- Top bar -->
+<div class="px-6 py-4 flex items-center justify-between">
+  <a href="#/menu" class="text-blue-600 text-lg font-medium">menu</a>
+  <button id="logoutBtn" class="text-red-600 text-sm font-medium">
+    Log out
+  </button>
+</div>
+
+<!-- Title -->
+<div class="flex flex-col items-center mt-2 space-y-1">
+  <h1 class="text-2xl font-semibold text-gray-800">Admin – Matchmakers</h1>
+  <p class="text-sm text-gray-600">Manage matchmakers</p>
+</div>
+
+<!-- Admin gate -->
+<div id="adminGate" class="mt-4 text-center text-sm text-red-600 hidden"></div>
+
+<!-- Main content wrapper (matches profile.html) -->
+<div id="adminContent" class="mt-6 flex flex-col space-y-6 w-full max-w-sm mx-auto">
+
+  <!-- Matchmaker List -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-800">Matchmakers</h2>
+      <button id="reloadMatchmakers" class="text-blue-600 text-sm underline">
+        Refresh
+      </button>
+    </div>
+
+    <div id="matchmakerList" class="space-y-4"></div>
+  </section>
+
+  <!-- Create Matchmaker -->
+  <section class="border-t border-gray-200 pt-6 space-y-4">
+    <h2 class="text-lg font-semibold text-gray-800">Create Matchmaker</h2>
+
+    <div class="space-y-4">
+
+      <div>
+        <label class="block text-gray-700 mb-1">First Name</label>
+        <input id="mm_first" type="text"
+          class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-1">Last Name</label>
+        <input id="mm_last" type="text"
+          class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-1">Email</label>
+        <input id="mm_email" type="email"
+          class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-1">Phone</label>
+        <input id="mm_phone" type="tel"
+          class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+      </div>
+
+      <button id="createMatchmakerBtn"
+        class="w-full bg-blue-600 text-white text-lg font-medium py-3 rounded-lg">
+        Create Matchmaker
+      </button>
+
+      <div id="createStatus"
+        class="text-center text-sm text-gray-600 min-h-[1.25rem]">
+      </div>
+    </div>
+  </section>
+</div>
+
+<!--script t ype="module" src="./src/admin.js"></script -->

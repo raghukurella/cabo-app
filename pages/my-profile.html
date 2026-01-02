@@ -1,0 +1,241 @@
+<div id="page">
+
+  <div class="px-6 py-4 flex items-center justify-between">
+    <a href="#/" class="text-blue-600 text-lg font-medium">&lt; Home</a>
+    <button id="logoutBtn" class="text-red-600 text-sm font-medium">
+      Log out
+    </button>
+  </div>
+
+  <div class="flex flex-col items-center mt-2 space-y-1">
+    <h1 class="text-2xl font-semibold text-gray-800">My Profile</h1>
+    <p class="text-sm text-gray-600">Your personal information</p>
+  </div>
+
+  <div id="profileStatus" class="mt-4 text-center text-sm text-gray-600">
+    Loading your profile…
+  </div>
+
+  <div id="profileView" class="mt-6 w-full max-w-sm mx-auto hidden space-y-4">
+
+    <div>
+      <label class="block text-gray-500 text-sm">Name</label>
+      <div id="name" class="text-lg font-medium text-gray-900"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Email</label>
+      <div id="email" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Phone</label>
+      <div id="phone_number" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Date of Birth</label>
+      <div id="datetime_of_birth" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Place of Birth</label>
+      <div id="place_of_birth" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Height</label>
+      <div id="height" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Gender</label>
+      <div id="gender" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Current Location</label>
+      <div id="current_location" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Willing to Relocate</label>
+      <div id="willing_to_relocate" class="text-gray-800"></div>
+    </div>
+
+    <div>
+      <label class="block text-gray-500 text-sm">Bio</label>
+      <div id="bio" class="text-gray-800 whitespace-pre-line"></div>
+    </div>
+
+  
+    <div id="qaList" class="space-y-4">
+      <!-- Questions + answers will be injected here -->
+    </div>
+
+    <button id="editBtn"
+      class="w-full bg-blue-600 text-white text-lg font-medium py-3 rounded-lg text-center">
+      Edit Profile
+    </button>
+
+  </div>
+
+</div>
+
+
+
+
+<script type="module">
+  import { supabase } from "./src/supabase.js";
+
+  console.log("✅ my-profile script running");
+
+  const statusEl = document.getElementById("profileStatus");
+  const viewEl = document.getElementById("profileView");
+
+  const fields = {
+    name: document.getElementById("name"),
+    email: document.getElementById("email"),
+    phone_number: document.getElementById("phone_number"),
+    datetime_of_birth: document.getElementById("datetime_of_birth"),
+    place_of_birth: document.getElementById("place_of_birth"),
+    height: document.getElementById("height"),
+    gender: document.getElementById("gender"),
+    current_location: document.getElementById("current_location"),
+    willing_to_relocate: document.getElementById("willing_to_relocate"),
+    bio: document.getElementById("bio")
+  };
+
+  // ✅ Load profile on page load
+  loadProfile();
+  
+
+  async function loadProfile() {
+    statusEl.textContent = "Loading your profile…";
+
+    // ✅ 1. Get current session
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData?.session;
+
+    if (!session) {
+      statusEl.textContent = "You are not logged in.";
+      window.location.hash = "#/login";
+      return;
+    }
+
+    const user = session.user;
+
+    // ✅ 2. Fetch profile from your `profiles` table
+    const { data: profile, error } = await supabase
+      .schema("cabo")
+      .from("mm_people")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      console.error("❌ Error loading profile:", error);
+      statusEl.textContent = "Failed to load your profile.";
+      return;
+    }
+
+    // ✅ 3. Populate fields
+    fields.name.textContent = profile.name || "—";
+    fields.email.textContent = user.email || "—";
+    fields.phone_number.textContent = profile.phone_number || "—";
+    fields.datetime_of_birth.textContent = profile.datetime_of_birth || "—";
+    fields.place_of_birth.textContent = profile.place_of_birth || "—";
+    fields.height.textContent = profile.height || "—";
+    fields.gender.textContent = profile.gender || "—";
+    fields.current_location.textContent = profile.current_location || "—";
+    fields.willing_to_relocate.textContent =
+      profile.willing_to_relocate ? "Yes" : "No";
+    fields.bio.textContent = profile.bio || "—";
+
+    // ✅ 4. Show the profile
+    statusEl.classList.add("hidden");
+    viewEl.classList.remove("hidden");
+
+    loadOptionalQA();
+  
+  }
+
+  // ✅ Logout
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.hash = "#/login";
+  });
+
+  // ✅ Edit button
+  document.getElementById("editBtn").addEventListener("click", () => {
+    window.location.hash = "#/profile";
+  });
+
+
+
+
+
+
+  async function loadOptionalQA() {
+    const qaList = document.getElementById("qaList");
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
+
+    if (!user) return;
+
+    // ✅ Fetch all active questions
+    const { data: questions, error: qErr } = await supabase
+      .schema("cabo")
+      .from("mm_questions")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (qErr) {
+      console.error("Question fetch error:", qErr);
+      return;
+    }
+
+    // ✅ Fetch user's answers
+    const { data: answers, error: aErr } = await supabase
+      .schema("cabo")
+      .from("mm_answers")
+      .select("*")
+      .eq("person_id", user.id);
+
+    if (aErr) {
+      console.error("Answer fetch error:", aErr);
+      return;
+    }
+
+    // ✅ Convert answers into lookup: { question_id: answer_text }
+    const answerMap = {};
+    answers.forEach(a => {
+      answerMap[a.question_id] = a.answer_text;
+    });
+
+    // ✅ Render Q&A
+    qaList.innerHTML = ""; // clear existing
+
+    questions.forEach(q => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "border-b border-gray-200 pb-3";
+
+      const questionEl = document.createElement("div");
+      questionEl.className = "text-gray-700 text-sm font-medium";
+      questionEl.textContent = q.question_text;
+
+      const answerEl = document.createElement("div");
+      answerEl.className = "text-gray-900 text-base mt-1";
+
+      const answer = answerMap[q.id];
+      answerEl.textContent = answer && answer.trim() !== "" ? answer : "—";
+
+      wrapper.appendChild(questionEl);
+      wrapper.appendChild(answerEl);
+      qaList.appendChild(wrapper);
+    });
+}
+
+</script>
