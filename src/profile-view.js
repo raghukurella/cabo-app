@@ -1,6 +1,10 @@
 // profile-view.js
 
+<<<<<<< HEAD
 export function profile_init(profileId) {
+=======
+export function init(profileId) {
+>>>>>>> 395a2b24282c41074751c7b4f784c86c889cefa7
   requestAnimationFrame(() => {
     initProfileView(profileId);
   });

@@ -3,6 +3,8 @@
 
 
 From now on, your workflow is:
+git status //shows the status of all the changed files
+
 git add .
 
 git restore --staged test.html   //repeat for files you don't want to commit
