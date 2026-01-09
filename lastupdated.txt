@@ -1,9 +1,12 @@
-1/2/2026
+1/9/2026
 
 
 
 From now on, your workflow is:
 git add .
+
+git restore --staged test.html   //repeat for files you don't want to commit
+
 git commit -m "message"
 git push
 
