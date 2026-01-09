@@ -129,7 +129,8 @@ async function loadPage() {
       if (token !== loadToken) return;
 
       // Only call profile_init from profile_main.js
-      if (s === "profile_main.js" && typeof module.profile_init === "function") {
+      // Call profile_init() if the module exports it
+      if (typeof module.profile_init === "function") {
         if (matchedRoute.isCreate) {
           module.profile_init(null);
         } else {
