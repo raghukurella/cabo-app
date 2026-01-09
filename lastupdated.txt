@@ -1,1 +1,11 @@
 1/2/2026
+
+
+
+From now on, your workflow is:
+git add .
+git commit -m "message"
+git push
+
+
+And everything goes to the correct repo.

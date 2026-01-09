@@ -1,16 +1,22 @@
 // profile_questions.js
 import { qs, showStatus } from "./profile_helpers.js";
 
-export let questions = [];          // profile questions
-export let preferences = [];        // preference questions
-export let existingAnswers = {};    // loaded earlier in profile_main.js
+export let questions = [];          // universal profile questions
+export let preferences = [];        // universal preference questions
+export let existingAnswers = {};    // loaded in edit mode
+
 export function setExistingAnswers(map) {
-  existingAnswers = map;
+  existingAnswers = map || {};
 }
 
 /**
  * Load active questions from mm_questions and render them.
- * Loads BOTH categories: profile + preferences.
+ * Questions are universal — they do NOT depend on personId.
+ * Preferences DO depend on personId because they load answers.
+ *
+ * IMPORTANT:
+ * This function MUST be called ONLY from profile_init(personId)
+ * AFTER personId is known.
  */
 export async function profile_loadQuestions(personId) {
   const wrapper = qs("questionsWrapper");
@@ -39,15 +45,22 @@ export async function profile_loadQuestions(personId) {
   questions = qData.filter(q => q.category === "profile");
   preferences = qData.filter(q => q.category === "preference");
 
-  // Render both sections
+  // Render universal profile questions
   profile_renderQuestions();
-  profile_renderPreferences(personId);
+
+  // Render preferences ONLY if personId is valid
+  if (personId) {
+    await profile_renderPreferences(personId);
+  }
 }
 
 /**
- * Render PROFILE questions into the accordion.
+ * Render PROFILE questions.
+ * These are universal — they do NOT depend on personId.
  */
 export function profile_renderQuestions() {
+  console.log("Rendering profile questions");
+
   const wrapper = qs("questionsWrapper");
   if (!wrapper) return;
   wrapper.innerHTML = "";
@@ -129,7 +142,7 @@ export function profile_renderQuestions() {
       fieldEl.className = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm";
     }
 
-    // Prefill
+    // Prefill existing answers (edit mode)
     const val = existingAnswers[q.id];
     if (val) {
       if (q.control_type === "radio") {
@@ -148,12 +161,12 @@ export function profile_renderQuestions() {
 }
 
 /**
- * Render PREFERENCES into the accordion.
+ * Render PREFERENCES — these DO depend on personId.
  */
 export async function profile_renderPreferences(personId) {
   if (!personId) {
-  console.warn("No personId provided — preferences cannot load yet.");
-  return;
+    console.warn("No personId provided — preferences cannot load yet.");
+    return;
   }
 
   const container = document.getElementById("preferencesContainer");

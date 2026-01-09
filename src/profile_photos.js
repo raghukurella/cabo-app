@@ -1,21 +1,12 @@
 import { qs } from "./profile_helpers.js";
-import {
-  editingProfileId,
-  photoUrls,
-  setPhotoUrls
-} from "./profile_state.js";
-
+import { getPhotoUrls, setPhotoUrls } from "./profile_state.js";
+import { getEditingProfileId } from "./profile_state.js";
 
 // DEBUG: intercept all uploads to profile_photos
 const originalUpload = window.supabase.storage.from("profile_photos").upload;
-
 window.supabase.storage.from("profile_photos").upload = function (...args) {
   return originalUpload.apply(this, args);
 };
-
-
-
-//export let photoUrls = [];
 
 // Prevent duplicate uploads per slot
 let activeUploads = {};
@@ -31,7 +22,10 @@ export function profile_renderPhotoSlots() {
   const photoInput = qs("photoInput");
   const photoModal = qs("photoModal");
   const modalImage = qs("modalImage");
+
   if (!photoGrid) return;
+
+  const urls = getPhotoUrls();
 
   photoGrid.innerHTML = "";
   for (let i = 0; i < 6; i++) {
@@ -39,7 +33,7 @@ export function profile_renderPhotoSlots() {
     slot.className =
       "relative w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer overflow-hidden";
 
-    const value = photoUrls[i] || null;
+    const value = urls[i] || null;
 
     if (value && value !== "__uploading__") {
       slot.innerHTML = `
@@ -51,29 +45,25 @@ export function profile_renderPhotoSlots() {
     } else {
       slot.textContent = "+";
     }
+
     slot.addEventListener("click", (e) => {
       if (e.target.classList.contains("delete-btn")) return;
 
-if (value && value !== "__uploading__") {
-  requestAnimationFrame(() => {
-    modalImage.src = "";
-    photoModal.classList.remove("hidden");
+      if (value && value !== "__uploading__") {
+        requestAnimationFrame(() => {
+          modalImage.src = "";
+          photoModal.classList.remove("hidden");
 
-    modalImage.src = value;
+          modalImage.src = value;
 
-    modalImage.onload = () => {
-      console.log("Modal image loaded");
-    };
-
-    modalImage.onerror = () => {
-      console.warn("Image failed to load:", value);
-      alert("Image could not be loaded.");
-    };
-  });
-
-  return;
-}
-
+          modalImage.onload = () => console.log("Modal image loaded");
+          modalImage.onerror = () => {
+            console.warn("Image failed to load:", value);
+            alert("Image could not be loaded.");
+          };
+        });
+        return;
+      }
 
       if (photoInput) {
         photoInput.dataset.slot = i;
@@ -84,11 +74,16 @@ if (value && value !== "__uploading__") {
     photoGrid.appendChild(slot);
   }
 
+  // Delete buttons
   photoGrid.querySelectorAll(".delete-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const index = Number(e.target.dataset.index);
       console.log("Deleting photo at index:", index);
-      photoUrls[index] = null;
+
+      const urls = getPhotoUrls();
+      urls[index] = null;
+      setPhotoUrls(urls);
+
       profile_renderPhotoSlots();
       e.stopPropagation();
     });
@@ -114,67 +109,75 @@ export function profile_attachPhotoUpload() {
   }
   uploadListenerAttached = true;
 
-photoInput.addEventListener("change", async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  photoInput.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const slotIndex = Number(photoInput.dataset.slot || 0);
+    const slotIndex = Number(photoInput.dataset.slot || 0);
 
-  if (activeUploads[slotIndex]) return;
-  activeUploads[slotIndex] = true;
+    if (activeUploads[slotIndex]) return;
+    activeUploads[slotIndex] = true;
 
-  // Mark slot as uploading
-  photoUrls[slotIndex] = "__uploading__";
-  profile_renderPhotoSlots();
+    // Mark slot as uploading
+    const urls = getPhotoUrls();
+    urls[slotIndex] = "__uploading__";
+    setPhotoUrls(urls);
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData?.session?.user;
-  if (!user) {
-    alert("Please log in to upload photos.");
-    photoUrls[slotIndex] = null;
-    delete activeUploads[slotIndex];
     profile_renderPhotoSlots();
-    return;
-  }
 
-  const ext = file.name.split(".").pop().toLowerCase();
-  const fileName = `${user.id}/${crypto.randomUUID()}.${ext}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("profile_photos")
-    .upload(fileName, file, { upsert: true });
-
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
-    alert("Upload failed");
-    photoUrls[slotIndex] = null;
-    delete activeUploads[slotIndex];
-    profile_renderPhotoSlots();
-    return;
-  }
-
-  const { data: urlData } = supabase.storage
-    .from("profile_photos")
-    .getPublicUrl(fileName);
-
-  const publicUrl = urlData.publicUrl;
-  photoUrls[slotIndex] = publicUrl;
-
-  // 🔥 Save to DB immediately
-  if (editingProfileId) {
-    const { error: dbError } = await supabase
-      .schema("cabo")
-      .from("mm_people")
-      .update({ photos: photoUrls })
-      .eq("id", editingProfileId);
-
-    if (dbError) {
-      console.error("DB save error:", dbError);
-      alert("Photo uploaded but failed to save profile.");
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
+    if (!user) {
+      alert("Please log in to upload photos.");
+      urls[slotIndex] = null;
+      setPhotoUrls(urls);
+      delete activeUploads[slotIndex];
+      profile_renderPhotoSlots();
+      return;
     }
-  }
 
-  delete activeUploads[slotIndex];
-  photoInput.value = "";
-  profile_renderPhotoSlots();
-});}
+    const ext = file.name.split(".").pop().toLowerCase();
+    const fileName = `${user.id}/${crypto.randomUUID()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("profile_photos")
+      .upload(fileName, file, { upsert: true });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      alert("Upload failed");
+      urls[slotIndex] = null;
+      setPhotoUrls(urls);
+      delete activeUploads[slotIndex];
+      profile_renderPhotoSlots();
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("profile_photos")
+      .getPublicUrl(fileName);
+
+    const publicUrl = urlData.publicUrl;
+    urls[slotIndex] = publicUrl;
+    setPhotoUrls(urls);
+
+    // 🔥 Save to DB immediately
+    const id = getEditingProfileId();
+    if (id) {
+      const { error: dbError } = await supabase
+        .schema("cabo")
+        .from("mm_people")
+        .update({ photos: urls })
+        .eq("id", id);
+
+      if (dbError) {
+        console.error("DB save error:", dbError);
+        alert("Photo uploaded but failed to save profile.");
+      }
+    }
+
+    delete activeUploads[slotIndex];
+    photoInput.value = "";
+    profile_renderPhotoSlots();
+  });
+}

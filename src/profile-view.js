@@ -1,6 +1,6 @@
 // profile-view.js
 
-export function init(profileId) {
+export function profile_init(profileId) {
   requestAnimationFrame(() => {
     initProfileView(profileId);
   });

@@ -17,3 +17,9 @@ export function profile_populateHeightOptions() {
     }
   }
 }
+
+// ⭐ Make it global (optional, but useful for console debugging)
+window.profile_populateHeightOptions = profile_populateHeightOptions;
+
+// ❌ Do NOT auto-call here — profile_init() handles timing now
+//  setTimeout(profile_populateHeightOptions, 0);

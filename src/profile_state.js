@@ -11,6 +11,31 @@ export function setEditingProfileId(id) {
   editingProfileId = id;
 }
 
-export function setPhotoUrls(arr) {
-  photoUrls = arr;
+
+
+
+
+
+
+export function getEditingProfileId() {
+  return editingProfileId;
 }
+
+
+
+
+export function getPhotoUrls() {
+  return photoUrls;
+}
+
+export function setPhotoUrls(newArr) {
+  photoUrls = newArr;
+}
+
+// DEBUG ONLY — remove later
+window.__debug = {
+  getPhotoUrls,
+  setPhotoUrls,
+  getEditingProfileId,
+  setEditingProfileId
+};

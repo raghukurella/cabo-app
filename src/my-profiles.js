@@ -83,7 +83,9 @@ function initMyProfiles() {
   const btn = document.getElementById("createProfileBtn");
   if (btn) {
     btn.onclick = () => {
+      console.log("Create button clicked");
       window.location.hash = "#/profile";
+      console.log("New hash:", window.location.hash);
     };
   }
 
@@ -101,3 +103,9 @@ window.addEventListener("hashchange", () => {
 if (window.location.hash.startsWith("#/my-profiles")) {
   setTimeout(initMyProfiles, 0);
 }
+
+
+
+
+
+
