@@ -24,9 +24,18 @@ async function loadPhotos(profileId) {
 
   let photos = data.photos;
 
+  // Normalize photos into an array
   if (!Array.isArray(photos)) {
-    try { photos = JSON.parse(photos); }
-    catch { photos = []; }
+    try {
+      photos = typeof photos === "string" ? JSON.parse(photos) : photos;
+    } catch {
+      photos = [];
+    }
+  }
+
+  // If it's still not an array (null, object, whatever), default to []
+  if (!Array.isArray(photos)) {
+    photos = [];
   }
 
   while (photos.length < 6) photos.push(null);
@@ -39,10 +48,31 @@ async function loadPhotos(profileId) {
 // MAIN INIT
 // --------------------------------------------------
 export async function profile_init(personId = null) {
-  // Store ID in global state
-  setEditingProfileId(personId);
+  const hash = window.location.hash;
 
-  // Always use the getter — never the stale local variable
+  // ⭐ Strict route guard — only allow:
+  //    #/profile
+  //    #/profile/<uuid>
+  if (!/^#\/profile(\/[0-9a-fA-F-]{36})?$/.test(hash)) {
+    console.warn("profile_main.js: wrong route — skipping init");
+    return;
+  }
+
+  // ⭐ DOM guard — ensures edit page HTML is present
+  if (!document.getElementById("photoGrid")) {
+    console.warn("profile_main.js loaded on a page without photoGrid — skipping init");
+    return;
+  }
+
+  // ⭐ Lazy-load edit-page modules ONLY when needed
+  const { profile_renderPhotoSlots, profile_attachPhotoUpload } =
+    await import("./profile_photos.js");
+
+  const { profile_populateHeightOptions } =
+    await import("./profile_height.js");
+
+  // ⭐ Now safe to run edit-page logic
+  setEditingProfileId(personId);
   const id = getEditingProfileId();
 
   await profile_populateHeightOptions();
@@ -55,18 +85,11 @@ export async function profile_init(personId = null) {
     profile_renderPhotoSlots();
   }
 
-  // Attach upload handler AFTER grid exists
   profile_attachPhotoUpload();
-
-  // Load questions + preferences
   await profile_loadQuestions(id);
 
-  // Reveal form
   const form = document.getElementById("profileForm");
   if (form) form.classList.remove("hidden");
-
-  const status = document.getElementById("profileStatus");
-  if (status) status.classList.add("hidden");
 }
 
 // ❌ REMOVE THIS — it causes double listeners

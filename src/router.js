@@ -128,9 +128,12 @@ async function loadPage() {
       // Cancel if a newer navigation started
       if (token !== loadToken) return;
 
-      // Only call profile_init from profile_main.js
-      // Call profile_init() if the module exports it
-      if (typeof module.profile_init === "function") {
+      // Only call profile_init for scripts defined on THIS route
+      const isCurrentScript =
+        (Array.isArray(matchedRoute.script) && matchedRoute.script.includes(s)) ||
+        s === matchedRoute.script;
+
+      if (isCurrentScript && typeof module.profile_init === "function") {
         if (matchedRoute.isCreate) {
           module.profile_init(null);
         } else {

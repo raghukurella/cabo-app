@@ -2,6 +2,14 @@ import { qs } from "./profile_helpers.js";
 import { getPhotoUrls, setPhotoUrls } from "./profile_state.js";
 import { getEditingProfileId } from "./profile_state.js";
 
+
+(function () {
+  if (!window.location.hash.startsWith("#/profile")) {
+    console.warn("profile_photos.js: wrong route — skipping");
+    return;
+  }
+})();
+
 // DEBUG: intercept all uploads to profile_photos
 const originalUpload = window.supabase.storage.from("profile_photos").upload;
 window.supabase.storage.from("profile_photos").upload = function (...args) {
