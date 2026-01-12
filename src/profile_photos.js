@@ -2,6 +2,7 @@ import { qs } from "./profile_helpers.js";
 import { getPhotoUrls, setPhotoUrls } from "./profile_state.js";
 import { getEditingProfileId } from "./profile_state.js";
 
+//20260112: Fixed photo delete issue. It now deletes photo and commits to database
 
 (function () {
   if (!window.location.hash.startsWith("#/profile")) {
@@ -84,13 +85,28 @@ export function profile_renderPhotoSlots() {
 
   // Delete buttons
   photoGrid.querySelectorAll(".delete-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", async (e) => {
       const index = Number(e.target.dataset.index);
       console.log("Deleting photo at index:", index);
 
       const urls = getPhotoUrls();
       urls[index] = null;
       setPhotoUrls(urls);
+
+      // 🔥 Save to DB immediately
+      const id = getEditingProfileId();
+      if (id) {
+        const { error: dbError } = await supabase
+          .schema("cabo")
+          .from("mm_people")
+          .update({ photos: urls })
+          .eq("id", id);
+
+        if (dbError) {
+          console.error("DB delete error:", dbError);
+          alert("Photo deleted locally but failed to save profile.");
+        }
+      }
 
       profile_renderPhotoSlots();
       e.stopPropagation();

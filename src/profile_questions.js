@@ -215,7 +215,9 @@ preferences.forEach(pref => {
     fieldEl.setAttribute("data-pref-id", pref.id);
   }
 
-  fieldEl.value = answerMap[pref.id] || "";
+  //fieldEl.value = answerMap[pref.id] || "";
+  // Save the value for later
+  const savedValue = answerMap[pref.id] || "";
 
   row.appendChild(label);
   row.appendChild(fieldEl);
@@ -224,6 +226,12 @@ preferences.forEach(pref => {
 
   document.querySelectorAll(".height-dropdown").forEach(el => {
     window.profile_populateHeightOptionsFor(el);
+
+      // ⭐ Now set the value AFTER options exist
+  const prefId = el.dataset.prefId;
+  const saved = answerMap[prefId];
+  if (saved) el.value = saved;
+
   });
 
 }
