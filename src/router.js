@@ -1,5 +1,9 @@
 // router.js
 import { supabase } from "./supabase.js";
+import { hasPermission } from "./security.js";
+
+
+
 
 // ------------------------------------------------------------
 // AUTH CHECK
@@ -106,6 +110,14 @@ async function loadPage() {
       return;
     }
   }
+
+  // // ⭐ ADMIN PERMISSION CHECK (correct location)
+  // if (matchedRoute.page === "pages/admin.html") {
+  //   if (!(await hasPermission("manage_app"))) {
+  //     window.location.hash = "#/unauthorized";
+  //     return;
+  //   }
+  // }
 
   // Load HTML
   const html = await fetch(matchedRoute.page).then(res => res.text());

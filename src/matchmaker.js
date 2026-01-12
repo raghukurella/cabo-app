@@ -1,5 +1,13 @@
 import { supabase } from "./supabase.js";
 
+  //Security related 1/11/2026
+  // if (!(await hasPermission("manage_matchmaking"))) {
+  //   hideMatchmakerUI();
+  // }
+
+
+
+
 async function requireMatchmaker() {
   const gate = document.getElementById("matchmakerGate");
   const content = document.getElementById("matchmakerContent");

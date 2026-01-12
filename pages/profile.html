@@ -1,6 +1,6 @@
 
 <div class="flex flex-col items-center mt-2 space-y-1">
-  <h1 class="text-xl font-semibold text-gray-800">My Profile</h1>
+  <h1 id="profileHeader" class="text-2xl font-bold mb-4">My Profile</h1>
   <p class="text-xs text-gray-600">View and update your details</p>
 </div>
 
@@ -27,16 +27,6 @@
         <label class="block text-gray-700 text-sm mb-1">Last name</label>
         <input id="last_name" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
       </div>
-      <!-- Email -->
-      <div>
-        <label class="block text-gray-700 text-sm mb-1">Email</label>
-        <input id="email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
-      </div>
-      <!-- Phone -->
-      <div>
-        <label class="block text-gray-700 text-sm mb-1">Phone number</label>
-        <input id="phone_number" type="tel" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
-      </div>
       <!-- Gender -->
       <div>
         <label class="block text-gray-700 text-sm mb-1">Gender</label>
@@ -53,6 +43,13 @@
         <input id="datetime_of_birth" type="datetime-local"
           class="w-full border rounded-lg px-3 py-2 text-sm" required/>
       </div>
+      <!-- Height -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Height</label>
+        <select id="height" class="w-full border rounded-lg px-3 py-2 text-sm bg-white">
+          <option value="">Select…</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -63,12 +60,15 @@
       Location & Details <span id="icon-section2">+</span>
     </button>
     <div id="section2" class="hidden px-3 py-2 space-y-2">
-      <!-- Height -->
+      <!-- Email -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Height</label>
-        <select id="height" class="w-full border rounded-lg px-3 py-2 text-sm bg-white">
-          <option value="">Select…</option>
-        </select>
+        <label class="block text-gray-700 text-sm mb-1">Email</label>
+        <input id="email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+      </div>
+      <!-- Phone -->
+      <div>
+        <label class="block text-gray-700 text-sm mb-1">Phone number</label>
+        <input id="phone_number" type="tel" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
       </div>
       <!-- Place of birth -->
       <div>
@@ -136,16 +136,17 @@
   </div>
 
 
-  <!-- Accordion: Preferences -->
-  <div class="border rounded">
-    <button type="button" onclick="toggleAccordion('sectionPreferences')"
-      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
-      Preferences <span id="icon-sectionPreferences">+</span>
-    </button>
-<div class="hidden px-3 py-2 space-y-2">
-  <div id="preferencesContainer" class="space-y-4"></div>
-</div>  </div>  
+<!-- Accordion: Preferences -->
+<div class="border rounded">
+  <button type="button" onclick="toggleAccordion('sectionPreferences')"
+    class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+    Preferences <span id="icon-sectionPreferences">+</span>
+  </button>
 
+  <div id="sectionPreferences" class="hidden px-3 py-2 space-y-2">
+    <div id="preferencesContainer" class="space-y-4"></div>
+  </div>
+</div>
   <!-- Save button at the bottom -->
   <button id="saveProfileBtn" type="button"
     class="w-full bg-blue-600 text-white text-base font-medium py-2 rounded-lg">

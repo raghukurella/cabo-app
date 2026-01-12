@@ -43,7 +43,7 @@ export async function profile_loadQuestions(personId) {
 
   // Split into categories
   questions = qData.filter(q => q.category === "profile");
-  preferences = qData.filter(q => q.category === "preference");
+  preferences = qData.filter(q => q.category?.trim().toLowerCase() === "preferences");
 
   // Render universal profile questions
   profile_renderQuestions();
@@ -170,6 +170,7 @@ export async function profile_renderPreferences(personId) {
   }
 
   const container = document.getElementById("preferencesContainer");
+  console.log("preferencesContainer:", container);
   if (!container) return;
 
   container.innerHTML = "";
@@ -184,22 +185,47 @@ export async function profile_renderPreferences(personId) {
   const answerMap = {};
   answers?.forEach(a => answerMap[a.question_id] = a.answer_text);
 
-  preferences.forEach(pref => {
-    const row = document.createElement("div");
-    row.className = "form-group";
+preferences.forEach(pref => {
+  const row = document.createElement("div");
+  row.className = "form-group";
 
-    row.innerHTML = `
-      <label>${pref.question_text}</label>
-      <input
-        type="text"
-        class="pref-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        data-pref-id="${pref.id}"
-        value="${answerMap[pref.id] || ''}"
-      />
-    `;
+  const label = document.createElement("label");
+  label.textContent = pref.question_text;
+  label.className = "block text-gray-700 text-sm";
 
-    container.appendChild(row);
+  let fieldEl;
+
+  if (pref.control_type === "dropdown") {
+    fieldEl = document.createElement("select");
+    fieldEl.className = "pref-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm";
+    fieldEl.setAttribute("data-pref-id", pref.id);
+
+    // ⭐ #1 — Detect height preference dynamically
+    if (pref.field_key === "minimum_height") {
+      fieldEl.classList.add("height-dropdown");
+    }
+
+    fieldEl.innerHTML = `<option value="">Select…</option>`;
+  }
+
+  else {
+    fieldEl = document.createElement("input");
+    fieldEl.type = "text";
+    fieldEl.className = "pref-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm";
+    fieldEl.setAttribute("data-pref-id", pref.id);
+  }
+
+  fieldEl.value = answerMap[pref.id] || "";
+
+  row.appendChild(label);
+  row.appendChild(fieldEl);
+  container.appendChild(row);
+});
+
+  document.querySelectorAll(".height-dropdown").forEach(el => {
+    window.profile_populateHeightOptionsFor(el);
   });
+
 }
 
 /**

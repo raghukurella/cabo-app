@@ -4,7 +4,8 @@ import { profile_loadQuestions, profile_saveQuestions } from "./profile_question
 import { qs, showStatus } from "./profile_helpers.js";
 import { setPhotoUrls, getEditingProfileId, setEditingProfileId } from "./profile_state.js";
 import { profile_renderPhotoSlots, profile_attachPhotoUpload } from "./profile_photos.js";
-import { profile_populateHeightOptions } from "./profile_height.js";
+import { profile_populateHeightOptionsFor } from "./profile_height.js";
+// import { hasPermission } from "./security.js";
 
 // --------------------------------------------------
 // Load photos
@@ -75,12 +76,38 @@ export async function profile_init(personId = null) {
   setEditingProfileId(personId);
   const id = getEditingProfileId();
 
-  await profile_populateHeightOptions();
+  //await profile_populateHeightOptions();
+  //await profile_populateHeightOptionsFor("#height");
+  await profile_populateHeightOptionsFor(document.getElementById("height"));
 
   if (id) {
+
     await loadProfileRow(id);
     await loadExistingAnswers(id);
     await loadPhotos(id);
+
+    // ⭐ Show "Edit Basic Info" button only for admins
+    // if (await hasPermission("edit_basic_info")) {
+    //   const btn = document.getElementById("editBasicInfoBtn");
+    //   if (btn) btn.classList.remove("hidden");
+    // }
+
+    // Make certain fields readonly when editing
+    qs("first_name").readOnly = true;
+    qs("last_name").readOnly = true;
+    qs("gender").disabled = true; // select elements use disabled
+    qs("datetime_of_birth").readOnly = true;
+
+    const lock = (el) => {
+      if (!el) return;
+      el.classList.add("bg-gray-100", "cursor-not-allowed");
+    };
+
+    lock(qs("first_name"));
+    lock(qs("last_name"));
+    lock(qs("gender"));
+    lock(qs("datetime_of_birth"));
+
   } else {
     profile_renderPhotoSlots();
   }
@@ -90,6 +117,17 @@ export async function profile_init(personId = null) {
 
   const form = document.getElementById("profileForm");
   if (form) form.classList.remove("hidden");
+
+  //SAVE
+  document
+  .getElementById("saveProfileBtn")
+  .addEventListener("click", saveProfile);
+
+  //CANCEL
+  document
+  .getElementById("cancelProfileBtn")
+  .addEventListener("click", cancelProfile);
+
 }
 
 // ❌ REMOVE THIS — it causes double listeners
@@ -147,6 +185,10 @@ async function saveProfile() {
   showStatus("Saved!");
   window.location.hash = `#/profilevw/${id}`;
 }
+//CANCEL  
+function cancelProfile() {
+  window.location.hash = "#/my-profiles";
+}
 
 // --------------------------------------------------
 // Create new profile
@@ -198,4 +240,17 @@ async function loadProfileRow(profileId) {
   qs("height").value = data.height ?? "";
   qs("bio").value = data.bio ?? "";
   qs("willing_to_relocate").checked = !!data.willing_to_relocate;
+
+  const header = document.getElementById("profileHeader");
+  if (header) {
+    const fullName = `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim();
+    header.textContent = fullName || "My Profile";
+  }
 }
+
+// if (await hasPermission("edit_basic_info")) {
+//   document.getElementById("editBasicInfoBtn").classList.remove("hidden");
+// }
+
+window.saveProfile = saveProfile;
+window.cancelProfile = cancelProfile;
