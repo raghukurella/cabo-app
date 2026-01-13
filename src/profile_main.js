@@ -5,7 +5,10 @@ import { qs, showStatus } from "./profile_helpers.js";
 import { setPhotoUrls, getEditingProfileId, setEditingProfileId } from "./profile_state.js";
 import { profile_renderPhotoSlots, profile_attachPhotoUpload } from "./profile_photos.js";
 import { profile_populateHeightOptionsFor } from "./profile_height.js";
+import { profile_attachShareButton } from "./profile_share.js";
 // import { hasPermission } from "./security.js";
+
+
 
 // --------------------------------------------------
 // Load photos
@@ -51,6 +54,7 @@ async function loadPhotos(profileId) {
 export async function profile_init(personId = null) {
   const hash = window.location.hash;
 
+console.log("profile_init running");
   // ⭐ Strict route guard — only allow:
   //    #/profile
   //    #/profile/<uuid>
@@ -127,6 +131,9 @@ export async function profile_init(personId = null) {
   document
   .getElementById("cancelProfileBtn")
   .addEventListener("click", cancelProfile);
+
+
+  profile_attachShareButton();
 
 }
 

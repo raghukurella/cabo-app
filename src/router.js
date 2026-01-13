@@ -1,7 +1,7 @@
 // router.js
 import { supabase } from "./supabase.js";
 import { hasPermission } from "./security.js";
-
+import { shared_profile_init } from "./shared-profile.js";
 
 
 
@@ -80,7 +80,18 @@ async function loadPage() {
   const token = ++loadToken;
 
   const hash = window.location.hash || "#/";
-  console.log("HASH:", hash);
+
+  
+  //Share Profile
+  if (hash.startsWith("#/shared-profile/")) {
+    const token = hash.split("/")[2];
+
+    const html = await fetch("pages/shared-profile.html").then(r => r.text());
+    document.getElementById("app").innerHTML = html;
+
+    shared_profile_init(token);
+    return;
+  }
 
   let matchedRoute = null;
   let params = [];
@@ -155,6 +166,7 @@ async function loadPage() {
     }
   }
 }
+
 
 // ------------------------------------------------------------
 // EVENT LISTENERS

@@ -1,6 +1,9 @@
 // profile-view.js
 
+import { renderFullProfile } from "./profile-render.js";
+
 export function profile_init(profileId) {
+  window.currentProfileId = profileId;
   requestAnimationFrame(() => {
     initProfileView(profileId);
   });
@@ -43,7 +46,7 @@ function initProfileView(profileId) {
       return;
     }
 
-    const age = computeAge(profile.datetime_of_birth);
+    //const age = computeAge(profile.datetime_of_birth);
 
     const { data: questions, error: qErr } = await window.supabase
       .schema("cabo")
@@ -76,73 +79,45 @@ function initProfileView(profileId) {
       answerMap[a.question_id] = a.answer_text;
     });
 
-    container.innerHTML = `
-      <h1 class="text-2xl font-semibold mb-4" align="center">
-      ${profile.first_name} ${profile.last_name}
-      (${age !== null ? age + " yrs" : "Age N/A"})
-      </h1>
-      <table class="w-full border border-gray-300 rounded-lg shadow-sm">
-        <tbody>
-          <tr><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
-          
-<tr>
-  <td class="border px-4 py-2 font-medium">Date of Birth</td>
-  <td class="border px-4 py-2">${formatDateTime(profile.datetime_of_birth)}</td>
-</tr>
 
-          <tr><td class="border px-4 py-2 font-medium">Place of Birth</td><td class="border px-4 py-2">${profile.place_of_birth ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Location</td><td class="border px-4 py-2">${profile.current_location ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Gender</td><td class="border px-4 py-2">${profile.gender ?? "-"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Height</td><td class="border px-4 py-2">${profile.height ?? ""}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Willing to Relocate</td><td class="border px-4 py-2">${profile.willing_to_relocate ? "Yes" : "No"}</td></tr>
-          <tr><td class="border px-4 py-2 font-medium">Bio</td><td class="border px-4 py-2">${profile.bio ?? "-"}</td></tr>
-          ${questions.map(q => `
-            <tr>
-              <td class="border px-4 py-2 font-medium w-1/3">${q.question_text}</td>
-              <td class="border px-4 py-2">${answerMap[q.id] ?? "<em>No answer provided</em>"}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-      <p>&nbsp;</p>
-    `;
+    renderFullProfile(profile, questions, answers, "profileContainer");
+
     container.classList.remove("hidden"); // <-- show it
   }
 
 
-//------------------------------------------------------------
-function formatDateTime(isoString) {
-  if (!isoString) return "-";
-  const date = new Date(isoString);
+  //------------------------------------------------------------
+  // function formatDateTime(isoString) {
+  //   if (!isoString) return "-";
+  //   const date = new Date(isoString);
 
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
+  //   const yyyy = date.getFullYear();
+  //   const mm = String(date.getMonth() + 1).padStart(2, "0");
+  //   const dd = String(date.getDate()).padStart(2, "0");
 
-  let hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  hours = hours ? hours : 12; // convert 0 → 12
+  //   let hours = date.getHours();
+  //   const minutes = String(date.getMinutes()).padStart(2, "0");
+  //   const ampm = hours >= 12 ? "PM" : "AM";
+  //   hours = hours % 12;
+  //   hours = hours ? hours : 12; // convert 0 → 12
 
-  return `${yyyy}-${mm}-${dd} ${hours}:${minutes} ${ampm}`;
-}
-//------------------------------------------------------------
+  //   return `${yyyy}-${mm}-${dd} ${hours}:${minutes} ${ampm}`;
+  // }
+  // //------------------------------------------------------------
 
 
-function computeAge(dob) {
-  if (!dob) return null;
-  const birth = new Date(dob);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  // Report age in current year (your original behavior)
-  return age + 1;
-}
+  // function computeAge(dob) {
+  //   if (!dob) return null;
+  //   const birth = new Date(dob);
+  //   const today = new Date();
+  //   let age = today.getFullYear() - birth.getFullYear();
+  //   const m = today.getMonth() - birth.getMonth();
+  //   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+  //     age--;
+  //   }
+  //   // Report age in current year (your original behavior)
+  //   return age + 1;
+  // }
 
   // ------------------------------------------------------------
   // BUTTONS
@@ -154,4 +129,57 @@ function computeAge(dob) {
   printBtn.addEventListener("click", () => {
     window.print();
   });
+
+    profile_attachShareButton();
+
 }
+
+
+
+
+
+import { createProfileShare } from "./profile_share.js";
+import { qs } from "./profile_helpers.js";
+
+export function profile_attachShareButton() {
+  console.log("profile_attachShareButton is running");
+
+  const btn = qs("shareProfileBtn");
+  const modal = qs("shareModal");
+  const cancelBtn = qs("shareCancelBtn");
+  const submitBtn = qs("shareSubmitBtn");
+
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  submitBtn.addEventListener("click", async () => {
+    const email = qs("shareEmail").value.trim();
+    const maxViews = Number(qs("shareViews").value) || null;
+    const daysValid = Number(qs("shareDays").value) || null;
+
+    const profileId = window.currentProfileId;   // correct
+
+    try {
+      const token = await createProfileShare(profileId, email, maxViews, daysValid);
+      const link = `${window.location.origin}/#/shared-profile/${token}`;
+
+      alert("Share link created:\n" + link);
+      console.log("Share link created:", link);
+
+      window.location.href = `mailto:${email}?subject=Your Matchmaker Share Link&body=Here is your link:%0A${link}`;
+
+      modal.classList.add("hidden");
+    } catch (err) {
+      alert("Failed to create share link.");
+      console.error(err);
+    }
+  });
+}
+

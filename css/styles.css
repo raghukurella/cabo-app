@@ -421,3 +421,8 @@ form input {
 
 /* -----------------------End Top Bar---------------------- */
 
+.shared-profile-wrapper {
+  max-width: 900px;       /* adjust to taste */
+  margin: 0 auto;         /* centers the content */
+  padding: 20px;          /* breathing room */
+}
