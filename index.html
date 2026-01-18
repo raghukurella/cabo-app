@@ -1,10 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MatchMaker</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      #editBtn,
+      #printBtn,
+      #shareProfileBtn,
+      #shareSubmitBtn,
+      #shareCancelBtn,
+      #printPhotosToggle,
+      label[for="printPhotosToggle"] {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 
 <header class="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
@@ -37,19 +55,20 @@
 
 <body class="bg-gray-50 min-h-screen">
 
-<!-- Routed content -->
-<div id="app"></div>
-<script type="module" src="./src/supabase.js"></script>
-<script type="module" src="./src/router.js"></script>
+  <!-- Routed content -->
+  <div id="app"></div>
+  <script type="module" src="./src/supabase.js?v=2o"></script>
+  <script type="module" src="./src/router.js?v=12"></script>
 
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const mobileMenu = document.getElementById("mobileMenu");
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
 
-  toggle.addEventListener("click", () => {
-    mobileMenu.classList.toggle("hidden");
-  });
-</script>
+    toggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+  </script>
 
 </body>
+
 </html>

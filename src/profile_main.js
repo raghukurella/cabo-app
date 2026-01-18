@@ -1,12 +1,11 @@
 // profile_main.js
 import { profile_buildUpdatePayload } from "./profile_payloads.js";
-import { profile_loadQuestions, profile_saveQuestions } from "./profile_questions.js";
+import { profile_loadQuestions, profile_saveQuestions } from "./profile_questions.js?v=2";
 import { qs, showStatus } from "./profile_helpers.js";
 import { setPhotoUrls, getEditingProfileId, setEditingProfileId } from "./profile_state.js";
 import { profile_renderPhotoSlots, profile_attachPhotoUpload } from "./profile_photos.js";
 import { profile_populateHeightOptionsFor } from "./profile_height.js";
 import { profile_attachShareButton } from "./profile_share.js";
-// import { hasPermission } from "./security.js";
 
 
 
@@ -54,7 +53,7 @@ async function loadPhotos(profileId) {
 export async function profile_init(personId = null) {
   const hash = window.location.hash;
 
-console.log("profile_init running");
+  console.log("profile_init running");
   // ⭐ Strict route guard — only allow:
   //    #/profile
   //    #/profile/<uuid>
@@ -119,18 +118,21 @@ console.log("profile_init running");
   profile_attachPhotoUpload();
   await profile_loadQuestions(id);
 
+  const status = document.getElementById("profileStatus");
+  if (status) status.classList.add("hidden");
+
   const form = document.getElementById("profileForm");
   if (form) form.classList.remove("hidden");
 
   //SAVE
   document
-  .getElementById("saveProfileBtn")
-  .addEventListener("click", saveProfile);
+    .getElementById("saveProfileBtn")
+    .addEventListener("click", saveProfile);
 
   //CANCEL
   document
-  .getElementById("cancelProfileBtn")
-  .addEventListener("click", cancelProfile);
+    .getElementById("cancelProfileBtn")
+    .addEventListener("click", cancelProfile);
 
 
   profile_attachShareButton();

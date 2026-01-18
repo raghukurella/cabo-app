@@ -1,4 +1,6 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+//import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+//import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm?x=1736890000";
 
 // ✅ Define constants BEFORE using them
 const SUPABASE_URL = "https://tshowljfunfshsodwgtf.supabase.co";
@@ -8,6 +10,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 //export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "cabo" } });
 
+console.log("🔥 SUPABASE CLIENT LOADED v20");
 
 // ✅ Make it globally available
 window.supabase = supabase;

@@ -1,10 +1,14 @@
+// ------------------------------------------------------------
 // router.js
+// ------------------------------------------------------------
 import { supabase } from "./supabase.js";
-import { hasPermission } from "./security.js";
 import { shared_profile_init } from "./shared-profile.js";
 
-
-
+import { loadPermissions } from "./permissions.js";
+import { permissionStore } from "./permissionStore.js";
+import { hasPermission } from "./hasPermission.js";
+import { forceLogout } from "./forceLogout.js";
+import { enforcePermissions } from "./enforcePermissions.js";
 // ------------------------------------------------------------
 // AUTH CHECK
 // ------------------------------------------------------------
@@ -23,7 +27,7 @@ const routeTable = [
   { pattern: /^#\/signup$/, page: "pages/signup.html", script: null, auth: false },
   { pattern: /^#\/search$/, page: "pages/search.html", script: null, auth: false },
   { pattern: /^#\/security$/, page: "pages/security.html", script: null, auth: false },
-
+  { pattern: /^#\/logout$/, page: null, script: null, auth: false, logout: true },
   // Protected dynamic routes
   {
     pattern: /^#\/profile\/([0-9a-fA-F-]{36})$/,
@@ -78,11 +82,20 @@ let loadToken = 0;
 
 async function loadPage() {
   const token = ++loadToken;
-
   const hash = window.location.hash || "#/";
 
-  
-  //Share Profile
+  // ------------------------------------------------------------
+  // LOAD PERMISSIONS BEFORE ROUTING
+  // ------------------------------------------------------------
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    const permissions = await loadPermissions();
+    permissionStore.set(permissions);
+  }
+
+  // ------------------------------------------------------------
+  // SPECIAL CASE: SHARED PROFILE
+  // ------------------------------------------------------------
   if (hash.startsWith("#/shared-profile/")) {
     const token = hash.split("/")[2];
 
@@ -93,10 +106,12 @@ async function loadPage() {
     return;
   }
 
+  // ------------------------------------------------------------
+  // MATCH ROUTE
+  // ------------------------------------------------------------
   let matchedRoute = null;
   let params = [];
 
-  // Match route
   for (const route of routeTable) {
     const match = hash.match(route.pattern);
     if (match) {
@@ -106,67 +121,156 @@ async function loadPage() {
     }
   }
 
-  // Fallback to landing
   if (!matchedRoute) {
     matchedRoute = routeTable[0];
   }
 
-  console.log("Matched route:", matchedRoute);
 
-  // AUTH CHECK
+  if (matchedRoute.logout) {
+    const { forceLogout } = await import("./forceLogout.js");
+    await forceLogout();
+    return;
+    ``
+  }
+
+  // ------------------------------------------------------------
+  // AUTH CHECK (must run BEFORE loading HTML)
+  // ------------------------------------------------------------
   if (matchedRoute.auth) {
-    const ok = await requireAuth();
-    if (!ok) {
-      window.location.href = "login.html";
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      console.warn("No valid session → forcing logout");
+      await forceLogout();
+      return;
+    }
+
+    // Optional: token expiration check
+    const expiresAt = session.expires_at * 1000;
+    if (Date.now() > expiresAt) {
+      console.warn("Expired session → forcing logout");
+      await forceLogout();
       return;
     }
   }
 
-  // // ⭐ ADMIN PERMISSION CHECK (correct location)
-  // if (matchedRoute.page === "pages/admin.html") {
-  //   if (!(await hasPermission("manage_app"))) {
-  //     window.location.hash = "#/unauthorized";
-  //     return;
-  //   }
-  // }
+  // ------------------------------------------------------------
+  // PERMISSION GUARDS
+  // ------------------------------------------------------------
+  if (matchedRoute.page === "pages/admin.html") {
+    if (!hasPermission("manage_app")) {
+      window.location.hash = "#/unauthorized";
+      return;
+    }
+  }
 
-  // Load HTML
-  const html = await fetch(matchedRoute.page).then(res => res.text());
+  if (matchedRoute.page === "pages/matchmaker.html") {
+    if (!hasPermission("view_all_profiles")) {
+      window.location.hash = "#/unauthorized";
+      return;
+    }
+  }
 
-  // Cancel if a newer navigation started
+  // ------------------------------------------------------------
+  // LOAD HTML
+  // ------------------------------------------------------------
+  const html = await fetch(matchedRoute.page + "?t=" + Date.now()).then(res => res.text());
   if (token !== loadToken) return;
 
   const app = document.getElementById("app");
   app.innerHTML = html;
 
-  // Load page-specific JS
+
+  enforcePermissions();
+
+  // ------------------------------------------------------------
+  // LOAD PAGE-SPECIFIC JS
+  // ------------------------------------------------------------
   if (matchedRoute.script) {
-    const scripts = Array.isArray(matchedRoute.script)
-      ? matchedRoute.script
-      : [matchedRoute.script];
+    const ts = Date.now();
+    if (Array.isArray(matchedRoute.script)) {
+      for (const s of matchedRoute.script) {
+        const module = await import("./" + s + "?t=" + ts);
+        if (token !== loadToken) return;
 
-    for (const s of scripts) {
-      const module = await import(`./${s}`);
+        // 1. profile_init (your existing pattern)
+        if (typeof module.profile_init === "function") {
+          if (matchedRoute.isCreate) {
+            module.profile_init(null);
+          } else {
+            module.profile_init(...params);
+          }
+          continue;
+        }
 
-      // Cancel if a newer navigation started
+        // 2. page_init (generic initializer)
+        if (typeof module.page_init === "function") {
+          module.page_init(...params);
+          continue;
+        }
+
+        // 3. init (universal initializer)
+        if (typeof module.init === "function") {
+          module.init(...params);
+          continue;
+        }
+      }
+    } else {
+      const module = await import("./" + matchedRoute.script + "?t=" + ts);
       if (token !== loadToken) return;
 
-      // Only call profile_init for scripts defined on THIS route
-      const isCurrentScript =
-        (Array.isArray(matchedRoute.script) && matchedRoute.script.includes(s)) ||
-        s === matchedRoute.script;
-
-      if (isCurrentScript && typeof module.profile_init === "function") {
+      // 1. profile_init (your existing pattern)
+      if (typeof module.profile_init === "function") {
         if (matchedRoute.isCreate) {
           module.profile_init(null);
         } else {
           module.profile_init(...params);
         }
+        return;
+      }
+
+      // 2. page_init (generic initializer)
+      if (typeof module.page_init === "function") {
+        module.page_init(...params);
+        return;
+      }
+
+      // 3. init (universal initializer)
+      if (typeof module.init === "function") {
+        module.init(...params);
+        return;
       }
     }
   }
 }
 
+// ------------------------------------------------------------
+// DEBUG AUTH STATE
+// ------------------------------------------------------------
+async function debugAuthState() {
+  console.clear();
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const sessionId = session?.access_token?.slice(0, 12) + "..." || null;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id || null;
+
+  let permissions = [];
+  if (userId) {
+    const { data: perms } = await supabase
+      .schema("cabo")
+      .from("mm_permissions_for_user")
+      .select("permission_name");
+
+    permissions = perms?.map(p => p.permission_name) || [];
+  }
+
+  console.log("🔐 AUTH DEBUG");
+  console.log("session:", sessionId);
+  console.log("user:", userId);
+  console.log("permissions:", permissions);
+}
 
 // ------------------------------------------------------------
 // EVENT LISTENERS

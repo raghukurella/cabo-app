@@ -1,7 +1,5 @@
-
 <div class="flex flex-col items-center mt-2 space-y-1">
   <h1 id="profileHeader" class="text-2xl font-bold mb-4">My Profile</h1>
-  <p class="text-xs text-gray-600">View and update your details</p>
 </div>
 
 <div id="profileStatus" class="mt-3 text-center text-xs text-gray-600">
@@ -19,18 +17,20 @@
     <div id="section1" class="hidden px-3 py-2 space-y-2">
       <!-- First name -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">First name</label>
-        <input id="first_name" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">First name</label>
+        <input id="first_name" type="text" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base"
+          required />
       </div>
       <!-- Last name -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Last name</label>
-        <input id="last_name" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Last name</label>
+        <input id="last_name" type="text" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base"
+          required />
       </div>
       <!-- Gender -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Gender</label>
-        <select id="gender" class="w-full border rounded-lg px-3 py-2 text-sm bg-white" required>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Gender</label>
+        <select id="gender" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base bg-white" required>
           <option value="">Select…</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
@@ -39,14 +39,14 @@
       </div>
       <!-- DOB -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Date & Time of Birth</label>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Date & Time of Birth</label>
         <input id="datetime_of_birth" type="datetime-local"
-          class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+          class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base" required />
       </div>
       <!-- Height -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Height</label>
-        <select id="height" class="w-full border rounded-lg px-3 py-2 text-sm bg-white">
+        <label class="block text-gray-900 text-base font-semibold mb-1">Height</label>
+        <select id="height" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base bg-white">
           <option value="">Select…</option>
         </select>
       </div>
@@ -62,34 +62,34 @@
     <div id="section2" class="hidden px-3 py-2 space-y-2">
       <!-- Email -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Email</label>
-        <input id="email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Email</label>
+        <input id="email" type="email" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base" required />
       </div>
       <!-- Phone -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Phone number</label>
-        <input id="phone_number" type="tel" class="w-full border rounded-lg px-3 py-2 text-sm" required/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Phone number</label>
+        <input id="phone_number" type="tel" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base"
+          required />
       </div>
       <!-- Place of birth -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Place of birth</label>
-        <input id="place_of_birth" type="text" class="w-full border rounded-lg px-3 py-2 text-sm"/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Place of birth</label>
+        <input id="place_of_birth" type="text" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base" />
       </div>
       <!-- Current location -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Current location</label>
-        <input id="current_location" type="text" class="w-full border rounded-lg px-3 py-2 text-sm"/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Current location</label>
+        <input id="current_location" type="text" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base" />
       </div>
       <!-- Citizenship -->
       <div>
-        <label class="block text-gray-700 text-sm mb-1">Country of Citizenship</label>
-        <input id="citizenship" type="text" class="w-full border rounded-lg px-3 py-2 text-sm"/>
+        <label class="block text-gray-900 text-base font-semibold mb-1">Country of Citizenship</label>
+        <input id="citizenship" type="text" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base" />
       </div>
       <!-- Relocate -->
       <div class="flex items-center space-x-2">
-        <input id="willing_to_relocate" type="checkbox"
-          class="h-4 w-4 text-blue-600 border-gray-300 rounded"/>
-        <label for="willing_to_relocate" class="text-gray-700 text-sm">I am willing to relocate</label>
+        <input id="willing_to_relocate" type="checkbox" class="h-5 w-5 text-blue-600 border-gray-500 rounded" />
+        <label for="willing_to_relocate" class="text-gray-900 text-base font-medium">I am willing to relocate</label>
       </div>
     </div>
   </div>
@@ -101,28 +101,27 @@
       Photos <span id="icon-section3">+</span>
     </button>
     <div id="section3" class="hidden px-3 py-2 space-y-2">
-      <label class="block text-gray-700 text-sm mb-1">Photos (up to 6)</label>
+      <label class="block text-gray-900 text-base font-semibold mb-1">Photos (up to 6)</label>
       <div id="photoGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-      <input id="photoInput" type="file" accept="image/*" class="hidden"/>
+      <input id="photoInput" type="file" accept="image/*" class="hidden" />
       <div id="photoModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50">
-        <img id="modalImage" class="max-w-full max-h-full rounded-lg"/>
+        <img id="modalImage" class="max-w-full max-h-full rounded-lg" />
       </div>
     </div>
   </div>
-<!-- Accordion: Bio -->
-<div class="border rounded">
-  <button type="button"
-    class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300"
-    onclick="toggleAccordion('sectionBio')">
-    Bio
-    <span id="icon-sectionBio">+</span>
-  </button>
-  <div id="sectionBio" class="hidden px-3 py-2 space-y-2">
-    <label class="block text-gray-700 text-sm mb-1">Bio</label>
-    <textarea id="bio" rows="3"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
+  <!-- Accordion: Bio -->
+  <div class="border rounded">
+    <button type="button"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300"
+      onclick="toggleAccordion('sectionBio')">
+      Bio
+      <span id="icon-sectionBio">+</span>
+    </button>
+    <div id="sectionBio" class="hidden px-3 py-2 space-y-2">
+      <label class="block text-gray-900 text-base font-semibold mb-1">Bio</label>
+      <textarea id="bio" rows="4" class="w-full border border-gray-500 rounded-lg px-3 py-3 text-base"></textarea>
+    </div>
   </div>
-</div>
 
   <!-- Accordion: Questions -->
   <div class="border rounded">
@@ -136,23 +135,22 @@
   </div>
 
 
-<!-- Accordion: Preferences -->
-<div class="border rounded">
-  <button type="button" onclick="toggleAccordion('sectionPreferences')"
-    class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
-    Preferences <span id="icon-sectionPreferences">+</span>
-  </button>
+  <!-- Accordion: Preferences -->
+  <div class="border rounded">
+    <button type="button" onclick="toggleAccordion('sectionPreferences')"
+      class="w-full flex justify-between items-center px-3 py-2 text-left text-sm font-medium bg-gray-300">
+      Preferences <span id="icon-sectionPreferences">+</span>
+    </button>
 
-  <div id="sectionPreferences" class="hidden px-3 py-2 space-y-2">
-    <div id="preferencesContainer" class="space-y-4"></div>
+    <div id="sectionPreferences" class="hidden px-3 py-2 space-y-2">
+      <div id="preferencesContainer" class="space-y-4"></div>
+    </div>
   </div>
-</div>
   <!-- Save button at the bottom -->
-  <button id="saveProfileBtn" type="button"
-    class="w-full bg-blue-600 text-white text-base font-medium py-2 rounded-lg">
+  <button id="saveProfileBtn" type="button" class="w-full bg-blue-600 text-white text-base font-medium py-2 rounded-lg">
     Save Profile
   </button>
-  <button id="cancelProfileBtn" type="button" 
+  <button id="cancelProfileBtn" type="button"
     class="w-full bg-gray-600 text-white text-base font-medium py-2 rounded-lg">
     Cancel
   </button>

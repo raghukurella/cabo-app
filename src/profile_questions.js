@@ -71,7 +71,8 @@ export function profile_renderQuestions() {
 
     const label = document.createElement("label");
     label.textContent = q.question_text;
-    label.className = "block text-gray-700 text-sm";
+    label.textContent = q.question_text;
+    label.className = "block text-gray-900 text-base font-semibold";
 
     let fieldEl;
 
@@ -80,36 +81,38 @@ export function profile_renderQuestions() {
       fieldEl = document.createElement("select");
       fieldEl.id = q.field_key;
       fieldEl.name = q.field_key;
-      fieldEl.className = "w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm";
+      fieldEl.id = q.field_key;
+      fieldEl.name = q.field_key;
+      fieldEl.className = "w-full border border-gray-500 rounded-lg px-3 py-3 bg-white text-base";
 
       fieldEl.innerHTML = `<option value="">Select…</option>`;
 
       // Known lists
       if (q.field_key === "raasi") {
-        const list = ["Mesha","Vrishabha","Mithuna","Karkataka","Simha","Kanya","Tula","Vrischika","Dhanu","Makara","Kumbha","Meena"];
+        const list = ["Mesha", "Vrishabha", "Mithuna", "Karkataka", "Simha", "Kanya", "Tula", "Vrischika", "Dhanu", "Makara", "Kumbha", "Meena"];
         fieldEl.innerHTML = `<option value="">Select Raasi…</option>` + list.map(x => `<option>${x}</option>`).join("");
       }
       else if (q.field_key === "lagnam") {
         const list = [
-          { key: "Mesha", label: "Mesha (Aries)" },{ key: "Vrishabha", label: "Vrishabha (Taurus)" },
-          { key: "Mithuna", label: "Mithuna (Gemini)" },{ key: "Karka", label: "Karka (Cancer)" },
-          { key: "Simha", label: "Simha (Leo)" },{ key: "Kanya", label: "Kanya (Virgo)" },
-          { key: "Tula", label: "Tula (Libra)" },{ key: "Vrischika", label: "Vrischika (Scorpio)" },
-          { key: "Dhanu", label: "Dhanu (Sagittarius)" },{ key: "Makara", label: "Makara (Capricorn)" },
-          { key: "Kumbha", label: "Kumbha (Aquarius)" },{ key: "Meena", label: "Meena (Pisces)" }
+          { key: "Mesha", label: "Mesha (Aries)" }, { key: "Vrishabha", label: "Vrishabha (Taurus)" },
+          { key: "Mithuna", label: "Mithuna (Gemini)" }, { key: "Karka", label: "Karka (Cancer)" },
+          { key: "Simha", label: "Simha (Leo)" }, { key: "Kanya", label: "Kanya (Virgo)" },
+          { key: "Tula", label: "Tula (Libra)" }, { key: "Vrischika", label: "Vrischika (Scorpio)" },
+          { key: "Dhanu", label: "Dhanu (Sagittarius)" }, { key: "Makara", label: "Makara (Capricorn)" },
+          { key: "Kumbha", label: "Kumbha (Aquarius)" }, { key: "Meena", label: "Meena (Pisces)" }
         ];
         fieldEl.innerHTML = `<option value="">Select Lagnam…</option>` + list.map(l => `<option value="${l.key}">${l.label}</option>`).join("");
       }
       else if (q.field_key === "religion") {
-        const list = ["Hinduism","Islam","Christianity","Sikhism","Buddhism","Jainism","Judaism","Zoroastrianism","Baháʼí","Other"];
+        const list = ["Hinduism", "Islam", "Christianity", "Sikhism", "Buddhism", "Jainism", "Judaism", "Zoroastrianism", "Baháʼí", "Other"];
         fieldEl.innerHTML = `<option value="">Select Religion…</option>` + list.map(x => `<option>${x}</option>`).join("");
       }
       else if (q.field_key === "nakshatram") {
         const list = [
-          "Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha","Magha",
-          "Purva Phalguni","Uttara Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha",
-          "Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishta","Shatabhisha","Purva Bhadrapada",
-          "Uttara Bhadrapada","Revati"
+          "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha",
+          "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+          "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada",
+          "Uttara Bhadrapada", "Revati"
         ];
         fieldEl.innerHTML = `<option value="">Select Nakshatram…</option>` + list.map(x => `<option>${x}</option>`).join("");
       }
@@ -118,7 +121,7 @@ export function profile_renderQuestions() {
     // Radio
     else if (q.control_type === "radio") {
       fieldEl = document.createElement("div");
-      ["Male","Female","Non-binary"].forEach(opt => {
+      ["Male", "Female", "Non-binary"].forEach(opt => {
         const radio = document.createElement("input");
         radio.type = "radio";
         radio.name = q.field_key;
@@ -139,7 +142,8 @@ export function profile_renderQuestions() {
       fieldEl.type = "text";
       fieldEl.id = q.field_key;
       fieldEl.name = q.field_key;
-      fieldEl.className = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm";
+      fieldEl.name = q.field_key;
+      fieldEl.className = "w-full border border-gray-500 rounded-lg px-3 py-3 text-base";
     }
 
     // Prefill existing answers (edit mode)
@@ -185,52 +189,55 @@ export async function profile_renderPreferences(personId) {
   const answerMap = {};
   answers?.forEach(a => answerMap[a.question_id] = a.answer_text);
 
-preferences.forEach(pref => {
-  const row = document.createElement("div");
-  row.className = "form-group";
+  preferences.forEach(pref => {
+    const row = document.createElement("div");
+    row.className = "form-group";
 
-  const label = document.createElement("label");
-  label.textContent = pref.question_text;
-  label.className = "block text-gray-700 text-sm";
+    const label = document.createElement("label");
+    label.textContent = pref.question_text;
+    label.textContent = pref.question_text;
+    label.className = "block text-gray-900 text-base font-semibold";
 
-  let fieldEl;
+    let fieldEl;
 
-  if (pref.control_type === "dropdown") {
-    fieldEl = document.createElement("select");
-    fieldEl.className = "pref-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm";
-    fieldEl.setAttribute("data-pref-id", pref.id);
+    if (pref.control_type === "dropdown") {
+      fieldEl = document.createElement("select");
+      fieldEl = document.createElement("select");
+      fieldEl.className = "pref-input w-full border border-gray-500 rounded-lg px-3 py-3 text-base";
+      fieldEl.setAttribute("data-pref-id", pref.id);
 
-    // ⭐ #1 — Detect height preference dynamically
-    if (pref.field_key === "minimum_height") {
-      fieldEl.classList.add("height-dropdown");
+      // ⭐ #1 — Detect height preference dynamically
+      if (pref.field_key === "minimum_height") {
+        fieldEl.classList.add("height-dropdown");
+      }
+
+      fieldEl.innerHTML = `<option value="">Select…</option>`;
     }
 
-    fieldEl.innerHTML = `<option value="">Select…</option>`;
-  }
+    else {
+      fieldEl = document.createElement("input");
+      fieldEl.type = "text";
+      fieldEl.type = "text";
+      fieldEl.className = "pref-input w-full border border-gray-500 rounded-lg px-3 py-3 text-base";
+      fieldEl.setAttribute("data-pref-id", pref.id);
+    }
 
-  else {
-    fieldEl = document.createElement("input");
-    fieldEl.type = "text";
-    fieldEl.className = "pref-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm";
-    fieldEl.setAttribute("data-pref-id", pref.id);
-  }
+    //fieldEl.value = answerMap[pref.id] || "";
+    // Save the value for later
+    const savedValue = answerMap[pref.id] || "";
 
-  //fieldEl.value = answerMap[pref.id] || "";
-  // Save the value for later
-  const savedValue = answerMap[pref.id] || "";
-
-  row.appendChild(label);
-  row.appendChild(fieldEl);
-  container.appendChild(row);
-});
+    row.appendChild(label);
+    row.appendChild(fieldEl);
+    container.appendChild(row);
+  });
 
   document.querySelectorAll(".height-dropdown").forEach(el => {
     window.profile_populateHeightOptionsFor(el);
 
-      // ⭐ Now set the value AFTER options exist
-  const prefId = el.dataset.prefId;
-  const saved = answerMap[prefId];
-  if (saved) el.value = saved;
+    // ⭐ Now set the value AFTER options exist
+    const prefId = el.dataset.prefId;
+    const saved = answerMap[prefId];
+    if (saved) el.value = saved;
 
   });
 

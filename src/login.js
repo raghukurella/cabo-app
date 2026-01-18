@@ -4,6 +4,20 @@
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
 
+
+console.log("🔥 login.js LOADED");
+
+  export function init() {
+    console.log("login.js init running");
+
+    const btn = document.getElementById("loginBtn");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+      // your login logic here
+    });
+  }
+
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
 

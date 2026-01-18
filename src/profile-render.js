@@ -19,8 +19,8 @@ export function renderFullProfile(profile, questions, answers, containerId = "pr
 
     <table class="w-full border border-gray-300 rounded-lg shadow-sm">
       <tbody>
-        <tr><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
-        <tr><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
+        <tr class="no-print"><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
+        <tr class="no-print"><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
 
         <tr>
           <td class="border px-4 py-2 font-medium">Date of Birth</td>
@@ -29,6 +29,7 @@ export function renderFullProfile(profile, questions, answers, containerId = "pr
 
         <tr><td class="border px-4 py-2 font-medium">Place of Birth</td><td class="border px-4 py-2">${profile.place_of_birth ?? "-"}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Location</td><td class="border px-4 py-2">${profile.current_location ?? "-"}</td></tr>
+        <tr><td class="border px-4 py-2 font-medium">Country of Citizenship</td><td class="border px-4 py-2">${profile.citizenship ?? "-"}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Gender</td><td class="border px-4 py-2">${profile.gender ?? "-"}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Height</td><td class="border px-4 py-2">${profile.height ?? ""}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Willing to Relocate</td><td class="border px-4 py-2">${profile.willing_to_relocate ? "Yes" : "No"}</td></tr>
@@ -42,6 +43,14 @@ export function renderFullProfile(profile, questions, answers, containerId = "pr
         `).join("")}
       </tbody>
     </table>
+
+    <!-- Photos Grid (Default hidden in print) -->
+    <div id="profilePhotosPrint" class="mt-6 no-print">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Photos</h2>
+      <div class="grid grid-cols-2 gap-4">
+        ${renderPhotos(profile.photos)}
+      </div>
+    </div>
 
     <p>&nbsp;</p>
   `;
@@ -77,4 +86,26 @@ function computeAge(dob) {
     age--;
   }
   return age + 1;
+}
+
+function renderPhotos(item) {
+  if (!item) return "";
+  let list = [];
+  try {
+    list = typeof item === "string" ? JSON.parse(item) : item;
+  } catch (e) {
+    return "";
+  }
+  if (!Array.isArray(list)) return "";
+
+  // Filter out nulls/empties
+  list = list.filter(url => url && typeof url === "string" && url.length > 5);
+
+  if (list.length === 0) return "<p class='text-gray-500 italic'>No photos available.</p>";
+
+  return list.map(url => `
+    <div class="border rounded-lg overflow-hidden shadow-sm">
+      <img src="${url}" class="w-full h-48 object-cover" alt="Profile Photo" />
+    </div>
+  `).join("");
 }

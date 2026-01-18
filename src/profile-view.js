@@ -27,7 +27,7 @@ function initProfileView(profileId) {
   }
 
   loadProfile(profileId);
-  
+
   // ------------------------------------------------------------
   // LOAD PROFILE (read-only)
   // ------------------------------------------------------------
@@ -130,7 +130,21 @@ function initProfileView(profileId) {
     window.print();
   });
 
-    profile_attachShareButton();
+  const toggle = document.getElementById("printPhotosToggle");
+  if (toggle) {
+    toggle.addEventListener("change", (e) => {
+      const photoBox = document.getElementById("profilePhotosPrint");
+      if (photoBox) {
+        if (e.target.checked) {
+          photoBox.classList.remove("no-print");
+        } else {
+          photoBox.classList.add("no-print");
+        }
+      }
+    });
+  }
+
+  profile_attachShareButton();
 
 }
 
