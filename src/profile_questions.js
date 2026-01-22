@@ -87,8 +87,22 @@ export function profile_renderQuestions() {
 
       fieldEl.innerHTML = `<option value="">Select…</option>`;
 
+      // 1. Dynamic options from DB
+      if (q.dropdown_options && Array.isArray(q.dropdown_options) && q.dropdown_options.length > 0) {
+        q.dropdown_options.forEach(opt => {
+          const option = document.createElement("option");
+          if (typeof opt === "object") {
+            option.value = opt.key || opt.value || opt.label;
+            option.textContent = opt.label || opt.value || opt.key;
+          } else {
+            option.value = opt;
+            option.textContent = opt;
+          }
+          fieldEl.appendChild(option);
+        });
+      }
       // Known lists
-      if (q.field_key === "raasi") {
+      else if (q.field_key === "raasi") {
         const list = ["Mesha", "Vrishabha", "Mithuna", "Karkataka", "Simha", "Kanya", "Tula", "Vrischika", "Dhanu", "Makara", "Kumbha", "Meena"];
         fieldEl.innerHTML = `<option value="">Select Raasi…</option>` + list.map(x => `<option>${x}</option>`).join("");
       }
@@ -212,6 +226,20 @@ export async function profile_renderPreferences(personId) {
       }
 
       fieldEl.innerHTML = `<option value="">Select…</option>`;
+
+      if (pref.dropdown_options && Array.isArray(pref.dropdown_options) && pref.dropdown_options.length > 0) {
+        pref.dropdown_options.forEach(opt => {
+          const option = document.createElement("option");
+          if (typeof opt === "object") {
+            option.value = opt.key || opt.value || opt.label;
+            option.textContent = opt.label || opt.value || opt.key;
+          } else {
+            option.value = opt;
+            option.textContent = opt;
+          }
+          fieldEl.appendChild(option);
+        });
+      }
     }
 
     else {
@@ -222,9 +250,11 @@ export async function profile_renderPreferences(personId) {
       fieldEl.setAttribute("data-pref-id", pref.id);
     }
 
-    //fieldEl.value = answerMap[pref.id] || "";
     // Save the value for later
     const savedValue = answerMap[pref.id] || "";
+    if (!fieldEl.classList.contains("height-dropdown")) {
+      fieldEl.value = savedValue;
+    }
 
     row.appendChild(label);
     row.appendChild(fieldEl);

@@ -20,9 +20,6 @@ window.supabase.storage.from("profile_photos").upload = function (...args) {
 // Prevent duplicate uploads per slot
 let activeUploads = {};
 
-// Prevent attaching multiple listeners
-let uploadListenerAttached = false;
-
 /**
  * Always render 6 slots, even if profile doesn't exist yet.
  */
@@ -127,11 +124,10 @@ export function profile_attachPhotoUpload() {
   const photoInput = qs("photoInput");
   if (!photoInput) return;
 
-  if (uploadListenerAttached) {
-    console.log("Upload listener already attached");
+  if (photoInput.dataset.listenerAttached) {
     return;
   }
-  uploadListenerAttached = true;
+  photoInput.dataset.listenerAttached = "true";
 
   photoInput.addEventListener("change", async (e) => {
     const file = e.target.files?.[0];
