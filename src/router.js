@@ -27,6 +27,7 @@ const routeTable = [
   { pattern: /^#\/signup$/, page: "pages/signup.html", script: null, auth: false },
   { pattern: /^#\/search$/, page: "pages/search.html", script: null, auth: false },
   { pattern: /^#\/security$/, page: "pages/security.html", script: null, auth: false },
+  { pattern: /^#\/login-history$/, page: "pages/login-history.html", script: "login-history.js", auth: true },
   { pattern: /^#\/logout$/, page: null, script: null, auth: false, logout: true },
   // Protected dynamic routes
   {
@@ -53,6 +54,7 @@ const routeTable = [
   // Protected static routes
   { pattern: /^#\/matchmaker$/, page: "pages/matchmaker.html", script: "matchmaker.js", auth: true },
   { pattern: /^#\/admin$/, page: "pages/admin.html", script: "admin.js", auth: true },
+  { pattern: /^#\/questions-manage$/, page: "pages/questions-manage.html", script: "questions-manage.js", auth: true },
 
   // Create mode (no profileId)
   {

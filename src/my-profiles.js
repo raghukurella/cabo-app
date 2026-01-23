@@ -103,9 +103,3 @@ window.addEventListener("hashchange", () => {
 if (window.location.hash.startsWith("#/my-profiles")) {
   setTimeout(initMyProfiles, 0);
 }
-
-
-
-
-
-

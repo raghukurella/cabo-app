@@ -41,6 +41,27 @@ console.log("🔥 login.js LOADED");
       return;
     }
 
+    // Track login
+    try {
+      const { data: { user } } = await window.supabase.auth.getUser();
+      if (user) {
+        let ip = null;
+        try {
+          const res = await fetch("https://api.ipify.org?format=json");
+          const json = await res.json();
+          ip = json.ip;
+        } catch (e) { console.warn("IP fetch failed", e); }
+
+        await window.supabase.schema("cabo").from("mm_login_history").insert({
+          user_id: user.id,
+          login_name: user.email,
+          ip_address: ip,
+          user_agent: navigator.userAgent,
+          device_info: "Web Client"
+        });
+      }
+    } catch (err) { console.error("Tracking failed", err); }
+
     // ✅ Redirect to dashboard or profile
     window.location.hash = "#/my-profiles";
   });

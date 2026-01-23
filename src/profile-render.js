@@ -21,12 +21,7 @@ export function renderFullProfile(profile, questions, answers, containerId = "pr
       <tbody>
         <tr class="no-print"><td class="border px-4 py-2 font-medium">Email</td><td class="border px-4 py-2">${profile.email ?? "-"}</td></tr>
         <tr class="no-print"><td class="border px-4 py-2 font-medium">Phone</td><td class="border px-4 py-2">${profile.phone_number ?? "-"}</td></tr>
-
-        <tr>
-          <td class="border px-4 py-2 font-medium">Date of Birth</td>
-          <td class="border px-4 py-2">${formatDateTime(profile.datetime_of_birth)}</td>
-        </tr>
-
+        <tr><td class="border px-4 py-2 font-medium">Date of Birth</td><td class="border px-4 py-2">${formatDateTime(profile.datetime_of_birth)}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Place of Birth</td><td class="border px-4 py-2">${profile.place_of_birth ?? "-"}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Location</td><td class="border px-4 py-2">${profile.current_location ?? "-"}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Country of Citizenship</td><td class="border px-4 py-2">${profile.citizenship ?? "-"}</td></tr>
@@ -34,13 +29,7 @@ export function renderFullProfile(profile, questions, answers, containerId = "pr
         <tr><td class="border px-4 py-2 font-medium">Height</td><td class="border px-4 py-2">${profile.height ?? ""}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Willing to Relocate</td><td class="border px-4 py-2">${profile.willing_to_relocate ? "Yes" : "No"}</td></tr>
         <tr><td class="border px-4 py-2 font-medium">Bio</td><td class="border px-4 py-2">${profile.bio ?? "-"}</td></tr>
-
-        ${questions.map(q => `
-          <tr>
-            <td class="border px-4 py-2 font-medium w-1/3">${q.question_text}</td>
-            <td class="border px-4 py-2">${answerMap[q.id] ?? "<em>No answer provided</em>"}</td>
-          </tr>
-        `).join("")}
+        ${questions.map(q => `<tr><td class="border px-4 py-2 font-medium w-1/3">${q.question_text}</td><td class="border px-4 py-2">${answerMap[q.id] ?? "<em>No answer provided</em>"}</td></tr>`).join("")}
       </tbody>
     </table>
 
