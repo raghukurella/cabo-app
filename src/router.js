@@ -55,6 +55,7 @@ const routeTable = [
   { pattern: /^#\/matchmaker$/, page: "pages/matchmaker.html", script: "matchmaker.js", auth: true },
   { pattern: /^#\/admin$/, page: "pages/admin.html", script: "admin.js", auth: true },
   { pattern: /^#\/questions-manage$/, page: "pages/questions-manage.html", script: "questions-manage.js", auth: true },
+  { pattern: /^#\/all-profiles$/, page: "pages/all-profiles.html", script: "all-profiles.js", auth: true },
 
   // Create mode (no profileId)
   {
@@ -166,22 +167,31 @@ async function loadPage() {
     }
   }
 
-  if (matchedRoute.page === "pages/matchmaker.html") {
-    if (!hasPermission("view_all_profiles")) {
-      window.location.hash = "#/unauthorized";
-      return;
-    }
-  }
-
   // ------------------------------------------------------------
   // LOAD HTML
   // ------------------------------------------------------------
-  const html = await fetch(matchedRoute.page + "?t=" + Date.now()).then(res => res.text());
+  let loadSuccess = true;
+  const html = await fetch(matchedRoute.page + "?t=" + Date.now()).then(res => {
+    if (!res.ok) {
+      throw new Error(`Failed to load ${matchedRoute.page}: ${res.status} ${res.statusText}`);
+    }
+    return res.text();
+  }).catch(err => {
+    loadSuccess = false;
+    console.error("Page load failed:", err);
+    return `<div class="p-4 text-red-600">Error loading page: ${err.message}</div>`;
+  });
+
   if (token !== loadToken) return;
 
   const app = document.getElementById("app");
+  if (!app) {
+    console.error("CRITICAL: #app container not found in index.html");
+    return;
+  }
   app.innerHTML = html;
 
+  if (!loadSuccess) return;
 
   enforcePermissions();
 
