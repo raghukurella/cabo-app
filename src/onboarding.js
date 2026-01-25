@@ -43,6 +43,38 @@ export async function init() {
     currentIndex = 0;
     answers = {};
 
+    // Load saved progress if available
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: progress } = await supabase
+        .schema("cabo")
+        .from("mj_prospect")
+        .select("current_step, answers")
+        .eq("auth_id", user.id)
+        .maybeSingle();
+
+      if (progress) {
+        if (progress.answers) answers = progress.answers;
+        if (typeof progress.current_step === "number") {
+          currentIndex = Math.min(Math.max(0, progress.current_step), questions.length - 1);
+        }
+      }
+    } else {
+      // Guest mode: Load from localStorage
+      const localData = localStorage.getItem("mm_onboarding_progress");
+      if (localData) {
+        try {
+          const progress = JSON.parse(localData);
+          if (progress.answers) answers = progress.answers;
+          if (typeof progress.current_step === "number") {
+            currentIndex = Math.min(Math.max(0, progress.current_step), questions.length - 1);
+          }
+        } catch (err) {
+          console.warn("Invalid local progress", err);
+        }
+      }
+    }
+
     renderStep();
 
   } catch (e) {
@@ -136,28 +168,90 @@ function renderStep() {
       const lbl = typeof opt === "object" ? (opt.label || opt.value || opt.key) : opt;
 
       const label = document.createElement("label");
-      label.className = `flex items-center p-4 border rounded-xl cursor-pointer transition-all ${savedValue === val ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:bg-gray-50'}`;
+      label.className = `flex items-center p-4 border rounded-xl cursor-pointer transition-all select-none`;
       
       const radio = document.createElement("input");
       radio.type = "radio";
       radio.name = `q_${q.id}`;
       radio.value = val;
-      radio.className = "form-radio h-5 w-5 text-blue-600 mr-3";
+      radio.className = "hidden";
       if (savedValue === val) radio.checked = true;
       
+      // Initial styling
+      if (savedValue === val) {
+          label.classList.add('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
+      } else {
+          label.classList.add('border-gray-200', 'hover:bg-gray-50');
+      }
+
       // Visual update on change
       radio.addEventListener('change', () => {
          const allLabels = inputEl.querySelectorAll('label');
          allLabels.forEach(l => {
              l.classList.remove('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
-             l.classList.add('border-gray-200');
+             l.classList.add('border-gray-200', 'hover:bg-gray-50');
          });
-         label.classList.remove('border-gray-200');
+         label.classList.remove('border-gray-200', 'hover:bg-gray-50');
          label.classList.add('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
       });
 
       label.appendChild(radio);
-      label.appendChild(document.createTextNode(lbl));
+      
+      const span = document.createElement("span");
+      span.className = "font-medium text-gray-700 w-full text-center";
+      span.textContent = lbl;
+      label.appendChild(span);
+
+      inputEl.appendChild(label);
+    });
+  } else if (type === "checkbox") {
+    inputEl = document.createElement("div");
+    inputEl.className = "flex flex-col gap-3";
+
+    const checkboxOptions = (q.options && Array.isArray(q.options) && q.options.length > 0)
+      ? q.options
+      : ["Option 1", "Option 2"];
+
+    // savedValue might be "A,B" or JSON string
+    const savedArray = savedValue ? savedValue.split(",") : [];
+
+    checkboxOptions.forEach(opt => {
+      const val = typeof opt === "object" ? (opt.key || opt.value || opt.label) : opt;
+      const lbl = typeof opt === "object" ? (opt.label || opt.value || opt.key) : opt;
+
+      const label = document.createElement("label");
+      label.className = `flex items-center p-4 border rounded-xl cursor-pointer transition-all select-none`;
+      
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = `q_${q.id}`;
+      checkbox.value = val;
+      checkbox.className = "hidden";
+      
+      const updateStyle = () => {
+        if (checkbox.checked) {
+          label.classList.add('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
+          label.classList.remove('border-gray-200', 'hover:bg-gray-50');
+        } else {
+          label.classList.remove('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
+          label.classList.add('border-gray-200', 'hover:bg-gray-50');
+        }
+      };
+
+      if (savedArray.includes(val)) {
+        checkbox.checked = true;
+      }
+      updateStyle();
+
+      checkbox.addEventListener('change', updateStyle);
+
+      label.appendChild(checkbox);
+      
+      const span = document.createElement("span");
+      span.className = "font-medium text-gray-700 w-full text-center";
+      span.textContent = lbl;
+      label.appendChild(span);
+      
       inputEl.appendChild(label);
     });
   } else if (type === "textarea") {
@@ -206,6 +300,12 @@ function saveCurrentAnswer() {
     if (type === "radio") {
         const checked = document.querySelector(`input[name="q_${q.id}"]:checked`);
         if (checked) val = checked.value;
+    } else if (type === "checkbox") {
+        const checkedBoxes = document.querySelectorAll(`input[name="q_${q.id}"]:checked`);
+        if (checkedBoxes.length > 0) {
+            // Join multiple values with comma
+            val = Array.from(checkedBoxes).map(cb => cb.value).join(",");
+        }
     } else {
         const el = document.getElementById("currentInput");
         if (el) val = el.value.trim();
@@ -218,7 +318,7 @@ function saveCurrentAnswer() {
     }
 }
 
-function handleNext() {
+async function handleNext() {
     saveCurrentAnswer();
 
     const q = questions[currentIndex];
@@ -236,11 +336,14 @@ function handleNext() {
         return;
     }
 
+    // Save state to DB
+    await saveProgress(currentIndex + 1);
+
     if (currentIndex < questions.length - 1) {
         currentIndex++;
         renderStep();
     } else {
-        finishOnboarding();
+        await finishOnboarding();
     }
 }
 
@@ -252,8 +355,44 @@ function handleBack() {
     }
 }
 
-function finishOnboarding() {
+async function saveProgress(stepIndex) {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    // Guest mode: Save to localStorage
+    localStorage.setItem("mm_onboarding_progress", JSON.stringify({
+      current_step: stepIndex,
+      answers: answers,
+      updated_at: new Date().toISOString()
+    }));
+    return;
+  }
+
+  const { error } = await supabase
+    .schema("cabo")
+    .from("mj_prospect")
+    .upsert({
+      auth_id: user.id,
+      current_step: stepIndex,
+      answers: answers,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "auth_id" });
+
+  if (error) console.error("Error saving progress:", error);
+}
+
+async function finishOnboarding() {
     console.log("Collected Answers:", answers);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      if (confirm("You've completed the questions! Create an account to save your profile?")) {
+        window.location.hash = "#/signup";
+      }
+      return;
+    }
+
     // Redirect to profiles (saving logic can be added here later)
     window.location.hash = "#/my-profiles";
 }
