@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+import Sortable from 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js';
 
 let questions = [];
 
@@ -30,7 +31,7 @@ async function loadQuestions() {
   const tbody = document.getElementById("qbList");
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading...</td></tr>';
 
   const { data, error } = await supabase
     .schema("cabo")
@@ -40,7 +41,7 @@ async function loadQuestions() {
 
   if (error) {
     console.error("Error loading questions:", error);
-    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error loading data</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading data</td></tr>';
     return;
   }
 
@@ -54,13 +55,14 @@ function renderQuestions() {
   tbody.innerHTML = "";
 
   if (questions.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No questions found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No questions found.</td></tr>';
     return;
   }
 
   questions.forEach(q => {
     const tr = document.createElement("tr");
-    tr.className = "hover:bg-gray-50 cursor-pointer transition-colors";
+    tr.className = "hover:bg-gray-50 transition-colors";
+    tr.dataset.id = q.id; // Add ID to the row for reordering
     
     const activeBadge = q.is_active 
       ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>' 
@@ -71,25 +73,70 @@ function renderQuestions() {
       : '';
 
     tr.innerHTML = `
+      <td class="px-2 py-4 whitespace-nowrap text-center text-gray-400 drag-handle cursor-move">
+        <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </td>
       <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">${q.sort_order}</td>
       <td class="px-6 py-4 text-sm text-gray-900 font-medium">
         ${q.question_text}
         ${q.message ? `<div class="text-xs text-gray-400 mt-0.5">${q.message}</div>` : ''}
       </td>
-      <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer">
         <div class="font-mono text-xs">${q.field_key}</div>
         <div class="text-xs text-gray-400">${q.control_type}</div>
       </td>
-      <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">${q.category || '-'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">
+      <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize cursor-pointer">${q.category || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap cursor-pointer">
         ${activeBadge}
         ${reqBadge}
       </td>
     `;
 
-    tr.addEventListener("click", () => openModal(q));
+    tr.addEventListener("click", (e) => {
+      if (e.target.closest('.drag-handle')) return; // Don't open modal if dragging
+      openModal(q);
+    });
     
     tbody.appendChild(tr);
+  });
+
+  // Initialize SortableJS
+  new Sortable(tbody, {
+    handle: '.drag-handle', // Restrict drag start to the handle
+    animation: 150,
+    onEnd: async function (evt) {
+      // Get the new order of question IDs from the DOM
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      // Create a lookup map from the local data
+      const qMap = new Map(questions.map(q => [q.id, q]));
+      
+      const updates = rows.map((row, index) => {
+        const id = row.dataset.id;
+        const originalQ = qMap.get(id) || {};
+        return {
+          ...originalQ, // Send full object to satisfy NOT NULL constraints
+          sort_order: (index + 1) * 10
+        };
+      });
+
+      // Batch update to Supabase
+      const { error } = await supabase
+        .schema('cabo')
+        .from('mj_question_bank')
+        .upsert(updates);
+
+      if (error) {
+        console.error("Reorder failed:", error);
+        alert("Failed to save new order.");
+      } else {
+        // Visually update the sort order numbers without a full reload
+        rows.forEach((row, index) => {
+            const sortCell = row.querySelector('td:nth-child(2)');
+            if(sortCell) sortCell.textContent = (index + 1) * 10;
+        });
+      }
+    }
   });
 }
 
