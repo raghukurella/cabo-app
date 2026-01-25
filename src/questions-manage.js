@@ -22,9 +22,8 @@ async function loadQuestions() {
 
   const { data, error } = await supabase
     .schema("cabo")
-    .from("mm_questions")
+    .from("mj_question_bank")
     .select("*")
-    .order("category", { ascending: false })
     .order("sort_order", { ascending: true });
 
   if (error) {
@@ -98,8 +97,9 @@ function editQuestion(q) {
   document.getElementById("q_control").value = q.control_type;
   document.getElementById("q_sort").value = q.sort_order;
   document.getElementById("q_active").checked = q.is_active;
+  document.getElementById("q_required").checked = q.is_required || false;
   
-  const opts = q.dropdown_options;
+  const opts = q.options;
   document.getElementById("q_options").value = opts ? JSON.stringify(opts, null, 2) : "";
 
   document.getElementById("btnSave").textContent = "Update Question";
@@ -113,6 +113,7 @@ function resetForm() {
   document.getElementById("formTitle").textContent = "Add New Question";
   document.getElementById("btnSave").textContent = "Save Question";
   document.getElementById("q_active").checked = true;
+  document.getElementById("q_required").checked = false;
 }
 
 async function handleSave(e) {
@@ -125,6 +126,7 @@ async function handleSave(e) {
   const control = document.getElementById("q_control").value;
   const sort = parseInt(document.getElementById("q_sort").value) || 0;
   const active = document.getElementById("q_active").checked;
+  const required = document.getElementById("q_required").checked;
   const optionsRaw = document.getElementById("q_options").value.trim();
 
   let options = null;
@@ -132,11 +134,11 @@ async function handleSave(e) {
     try {
       options = JSON.parse(optionsRaw);
       if (!Array.isArray(options)) {
-        alert("Dropdown options must be a JSON Array (e.g. ['A', 'B'])");
+        alert("Options must be a JSON Array (e.g. ['A', 'B'])");
         return;
       }
     } catch (err) {
-      alert("Invalid JSON in Dropdown Options");
+      alert("Invalid JSON in Options");
       return;
     }
   }
@@ -148,7 +150,8 @@ async function handleSave(e) {
     control_type: control,
     sort_order: sort,
     is_active: active,
-    dropdown_options: options
+    is_required: required,
+    options: options
   };
 
   let error;
@@ -157,7 +160,7 @@ async function handleSave(e) {
     // Update
     const { data, error: updateError } = await supabase
       .schema("cabo")
-      .from("mm_questions")
+      .from("mj_question_bank")
       .update(payload)
       .eq("id", id)
       .select();
@@ -171,7 +174,7 @@ async function handleSave(e) {
     // Insert
     const { data, error: insertError } = await supabase
       .schema("cabo")
-      .from("mm_questions")
+      .from("mj_question_bank")
       .insert([{ ...payload, id: crypto.randomUUID() }]);
       // Insert usually throws error on RLS failure, but good to be consistent
     error = insertError;

@@ -6,6 +6,7 @@ import { setPhotoUrls, getEditingProfileId, setEditingProfileId } from "./profil
 import { profile_renderPhotoSlots, profile_attachPhotoUpload } from "./profile_photos.js";
 import { profile_populateHeightOptionsFor } from "./profile_height.js";
 import { profile_attachShareButton } from "./profile_share.js";
+import { profile_validateForm } from "./profile_validation.js";
 
 
 
@@ -168,6 +169,11 @@ async function loadExistingAnswers(personId) {
 // Save profile
 // --------------------------------------------------
 async function saveProfile() {
+  if (!profile_validateForm()) {
+    showStatus("Please fill in all required fields.", 3000);
+    return;
+  }
+
   let id = getEditingProfileId();
 
   if (!id) {

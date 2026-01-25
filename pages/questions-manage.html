@@ -40,14 +40,20 @@
           <label class="block text-sm font-medium text-gray-700">Sort Order</label>
           <input type="number" id="q_sort" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="10" />
         </div>
-        <div class="flex items-center mt-6">
-          <input type="checkbox" id="q_active" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked />
-          <label for="q_active" class="ml-2 block text-sm text-gray-900">Is Active</label>
+        <div class="flex items-center mt-6 gap-6">
+          <div class="flex items-center">
+            <input type="checkbox" id="q_active" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked />
+            <label for="q_active" class="ml-2 block text-sm text-gray-900">Is Active</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="q_required" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+            <label for="q_required" class="ml-2 block text-sm text-gray-900">Is Required</label>
+          </div>
         </div>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700">Dropdown Options (JSON Array)</label>
+        <label class="block text-sm font-medium text-gray-700">Options (JSON Array)</label>
         <p class="text-xs text-gray-500 mb-1">Example: ["Option A", "Option B"] or [{"key":"A", "label":"Option A"}]</p>
         <textarea id="q_options" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 font-mono text-sm"></textarea>
       </div>

@@ -23,12 +23,12 @@ async function requireAuth() {
 const routeTable = [
   // Public routes
   { pattern: /^#\/?$/, page: "pages/landing.html", script: null, auth: false },
-  { pattern: /^#\/login$/, page: "pages/login.html", script: "login.js", auth: false },
-  { pattern: /^#\/signup$/, page: "pages/signup.html", script: null, auth: false },
-  { pattern: /^#\/search$/, page: "pages/search.html", script: null, auth: false },
-  { pattern: /^#\/security$/, page: "pages/security.html", script: null, auth: false },
-  { pattern: /^#\/login-history$/, page: "pages/login-history.html", script: "login-history.js", auth: true },
-  { pattern: /^#\/logout$/, page: null, script: null, auth: false, logout: true },
+  { pattern: /^#\/login\/?$/, page: "pages/login.html", script: "login.js", auth: false },
+  { pattern: /^#\/signup\/?$/, page: "pages/signup.html", script: null, auth: false },
+  { pattern: /^#\/search\/?$/, page: "pages/search.html", script: null, auth: false },
+  { pattern: /^#\/security\/?$/, page: "pages/security.html", script: null, auth: false },
+  { pattern: /^#\/login-history\/?$/, page: "pages/login-history.html", script: "login-history.js", auth: true },
+  { pattern: /^#\/logout\/?$/, page: null, script: null, auth: false, logout: true },
   // Protected dynamic routes
   {
     pattern: /^#\/profile\/([0-9a-fA-F-]{36})$/,
@@ -52,14 +52,17 @@ const routeTable = [
   },
 
   // Protected static routes
-  { pattern: /^#\/matchmaker$/, page: "pages/matchmaker.html", script: "matchmaker.js", auth: true },
-  { pattern: /^#\/admin$/, page: "pages/admin.html", script: "admin.js", auth: true },
-  { pattern: /^#\/questions-manage$/, page: "pages/questions-manage.html", script: "questions-manage.js", auth: true },
-  { pattern: /^#\/all-profiles$/, page: "pages/all-profiles.html", script: "all-profiles.js", auth: true },
+  { pattern: /^#\/matchmaker\/?$/, page: "pages/matchmaker.html", script: "matchmaker.js", auth: true },
+  { pattern: /^#\/admin\/?$/, page: "pages/admin.html", script: "admin.js", auth: true },
+  { pattern: /^#\/questions-manage\/?$/, page: "pages/questions-manage.html", script: "questions-manage.js", auth: true },
+  { pattern: /^#\/all-profiles\/?$/, page: "pages/all-profiles.html", script: "all-profiles.js", auth: true },
+  { pattern: /^#\/prospect\/?$/, page: "pages/prospect.html", script: "prospect.js", auth: true },
+  { pattern: /^#\/onboarding\/?$/, page: "pages/onboarding.html", script: "onboarding.js", auth: true },
+  { pattern: /^#\/manage_question_bank\/?$/, page: "pages/manage_question_bank.html", script: "manage_question_bank.js", auth: true },
 
   // Create mode (no profileId)
   {
-    pattern: /^#\/profile$/,
+    pattern: /^#\/profile\/?$/,
     page: "pages/profile.html",
     script: ["profile_main.js", "profile_accordion.js", "profile_height.js", "profile_photos.js"],
     auth: true,
@@ -68,14 +71,14 @@ const routeTable = [
 
   // Multi-profile list
   {
-    pattern: /^#\/my-profiles$/,
+    pattern: /^#\/my-profiles\/?$/,
     page: "pages/my-profiles.html",
     script: "my-profiles.js",
     auth: true
   },
 
-  { pattern: /^#\/menu$/, page: "pages/menu.html", script: null, auth: true },
-  { pattern: /^#\/menu-manage$/, page: "pages/menu-manage.html", script: null, auth: true },
+  { pattern: /^#\/menu\/?$/, page: "pages/menu.html", script: null, auth: true },
+  { pattern: /^#\/menu-manage\/?$/, page: "pages/menu-manage.html", script: null, auth: true },
 ];
 
 // ------------------------------------------------------------
@@ -199,36 +202,44 @@ async function loadPage() {
   // LOAD PAGE-SPECIFIC JS
   // ------------------------------------------------------------
   if (matchedRoute.script) {
+    console.log("Router: Found script definition:", matchedRoute.script);
     const ts = Date.now();
     if (Array.isArray(matchedRoute.script)) {
       for (const s of matchedRoute.script) {
-        const module = await import("./" + s + "?t=" + ts);
-        if (token !== loadToken) return;
+        try {
+          const module = await import("./" + s + "?t=" + ts);
+          if (token !== loadToken) return;
 
-        // 1. profile_init (your existing pattern)
-        if (typeof module.profile_init === "function") {
-          if (matchedRoute.isCreate) {
-            module.profile_init(null);
-          } else {
-            module.profile_init(...params);
+          // 1. profile_init (your existing pattern)
+          if (typeof module.profile_init === "function") {
+            if (matchedRoute.isCreate) {
+              module.profile_init(null);
+            } else {
+              module.profile_init(...params);
+            }
+            continue;
           }
-          continue;
-        }
-
-        // 2. page_init (generic initializer)
-        if (typeof module.page_init === "function") {
-          module.page_init(...params);
-          continue;
-        }
-
-        // 3. init (universal initializer)
-        if (typeof module.init === "function") {
-          module.init(...params);
-          continue;
+          // ... other inits if needed
+        } catch (err) {
+          console.error(`Failed to load script ${s}:`, err);
         }
       }
     } else {
-      const module = await import("./" + matchedRoute.script + "?t=" + ts);
+      let module;
+      try {
+        const scriptPath = "./" + matchedRoute.script;
+        console.log(`Router: Importing module from ${scriptPath}`);
+        module = await import(scriptPath + "?t=" + ts);
+      } catch (err) {
+        console.error(`Router: Failed to import ${matchedRoute.script}`, err);
+        const app = document.getElementById("app");
+        if (app) app.innerHTML += `<div class="p-4 text-red-600 bg-red-50 border border-red-200 rounded mt-4">
+          <strong>Error loading script:</strong> ${err.message}<br>
+          Check console for details.
+        </div>`;
+        return;
+      }
+      
       if (token !== loadToken) return;
 
       // 1. profile_init (your existing pattern)
@@ -252,6 +263,8 @@ async function loadPage() {
         module.init(...params);
         return;
       }
+      
+      console.warn("Router: Module loaded but no init/profile_init function found:", module);
     }
   }
 }

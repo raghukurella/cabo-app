@@ -216,7 +216,6 @@ export async function profile_renderPreferences(personId) {
 
     if (pref.control_type === "dropdown") {
       fieldEl = document.createElement("select");
-      fieldEl = document.createElement("select");
       fieldEl.className = "pref-input w-full border border-gray-500 rounded-lg px-3 py-3 text-base";
       fieldEl.setAttribute("data-pref-id", pref.id);
 
@@ -266,7 +265,8 @@ export async function profile_renderPreferences(personId) {
 
     // ⭐ Now set the value AFTER options exist
     const prefId = el.dataset.prefId;
-    const saved = answerMap[prefId];
+    // Handle potential type mismatch (string vs number)
+    const saved = answerMap[prefId] || answerMap[Number(prefId)];
     if (saved) el.value = saved;
 
   });

@@ -1,0 +1,148 @@
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+
+  <form id="prospectForm" class="space-y-8">
+    
+    <!-- Basic Info Section -->
+    <section>
+      <h2 class="text-lg font-semibold text-gray-800 bg-gray-100 p-3 rounded mb-4">Required Details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+          <input type="text" id="p_first_name" class="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+          <input type="text" id="p_last_name" class="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="p_email" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input type="tel" id="p_phone" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+          <select id="p_gender" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">Select...</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Non-binary">Non-binary</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time of Birth</label>
+          <input type="datetime-local" id="p_dob" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Height</label>
+          <select id="p_height" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">Select...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Citizenship</label>
+          <select id="p_citizenship" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">Select...</option>
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+            <option value="India">India</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Current Residence</label>
+          <select id="p_residence_country" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">Select...</option>
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+            <option value="India">India</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div id="div_immigration_status" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Immigration Status</label>
+          <select id="p_immigration_status" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">Select...</option>
+            <option value="CITIZEN">Citizen</option>
+            <option value="PERMANENT_RESIDENT">Permanent Resident</option>
+            <option value="WORK_VISA">Work Visa</option>
+            <option value="STUDENT_VISA">Student Visa</option>
+            <option value="DEPENDENT_VISA">Dependent Visa</option>
+            <option value="REFUGEE_OR_PROTECTED">Refugee or Protected</option>
+            <option value="NO_WORK_AUTHORIZATION">No Work Authorization</option>
+            <option value="PREFER_NOT_TO_SAY">Prefer Not to Say</option>
+          </select>
+        </div>
+        <div id="div_immigration_detail" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Immigration Detail</label>
+          <input type="text" id="p_immigration_status_detail" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+      </div>
+
+
+
+
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Place of Birth (Village/City, State, Country)</label>
+          <input type="text" id="p_pob" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Current Location</label>
+          <input type="text" id="p_location" class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center">
+          <input type="checkbox" id="p_relocate" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="p_relocate" class="ml-2 text-sm text-gray-700">Willing to Relocate</label>
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea id="p_bio" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2"></textarea>
+      </div>
+    </section>
+
+    <!-- Dynamic Questions Section -->
+    <section>
+      <h2 class="text-lg font-semibold text-gray-800 bg-gray-100 p-3 rounded mb-4">Additional Details (optional)</h2>
+      <div id="prospectQuestions" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Injected via JS -->
+        <div class="col-span-full text-gray-500 text-sm">Loading questions...</div>
+      </div>
+    </section>
+
+    <!-- Dynamic Preferences Section -->
+    <section>
+      <h2 class="text-lg font-semibold text-gray-800 bg-gray-100 p-3 rounded mb-4">Preferences</h2>
+      <div id="prospectPreferences" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <div class="sticky bottom-0 bg-white z-10 flex items-center justify-end gap-4 py-4 border-t mt-6">
+      <button type="button" id="btnCancelProspect" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+        Cancel
+      </button>
+      <button type="submit" id="btnSaveProspect" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm">
+        Save
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+    <div class="text-green-500 text-5xl mb-4">✓</div>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">Prospect Saved!</h3>
+    <p class="text-gray-600 mb-6">The profile has been successfully created.</p>
+    <button id="btnSuccessOk" class="w-full bg-blue-600 text-white py-2 rounded-lg">OK</button>
+  </div>
+</div>

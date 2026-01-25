@@ -1,78 +1,56 @@
 <div class="menu-container">
-
-  <style>
-    .menu-container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 1em;
-    }
-
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1em;
-    }
-
-    .menu-card {
-      background: #fff;
-      padding: 1.2em;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      border: 1px solid #e5e5e5;
-    }
-
-    .menu-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-
-    .menu-card h2 {
-      font-size: 1.2em;
-      margin-bottom: 0.3em;
-      color: #222;
-    }
-
-    .menu-card p {
-      font-size: 0.9em;
-      color: #555;
-    }
-
-    @media (min-width: 700px) {
-      .menu-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-  </style>
-
-  <h1>Menu</h1>
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Menu</h1>
+    <a href="#/logout" class="text-red-600 font-medium text-sm">Logout</a>
+  </div>
 
   <div class="menu-grid">
-    <div class="menu-card" onclick="window.location.hash = '#/login'">
-      <h2>Login</h2>
-      <p>Find matches and filter profiles</p>
-    </div>
-
-    <div class="menu-card" onclick="window.location.hash = '#/my-profiles'">
+    <!-- My Profiles -->
+    <div class="menu-card" onclick="window.location.hash='#/my-profiles'">
       <h2>My Profiles</h2>
-      <p>View and edit your profiles</p>
+      <p>View and edit profiles you created</p>
     </div>
 
-    <div class="menu-card" onclick="window.location.hash = '#/matchmaker'">
+    <!-- Matchmaker -->
+    <div class="menu-card" onclick="window.location.hash='#/matchmaker'">
       <h2>Matchmaker</h2>
-      <p>Find matches and filter profiles</p>
+      <p>Search and filter profiles</p>
     </div>
 
-    <div class="menu-card" onclick="window.location.hash = '#/admin'">
+    <!-- All Profiles -->
+    <div class="menu-card" onclick="window.location.hash='#/all-profiles'">
+      <h2>All Profiles</h2>
+      <p>Browse all profiles in a grid</p>
+    </div>
+
+    <!-- Prospect (NEW) -->
+    <div class="menu-card" onclick="window.location.hash='#/prospect'">
+      <h2>New Prospect</h2>
+      <p>Add a new person to the database</p>
+    </div>
+
+    <!-- Questions -->
+    <div class="menu-card" onclick="window.location.hash='#/questions-manage'">
+      <h2>Manage Questions</h2>
+      <p>Add or edit profile questions</p>
+    </div>
+
+    <!-- Admin -->
+    <div class="menu-card" onclick="window.location.hash='#/admin'">
       <h2>Admin</h2>
-      <p>Manage people, profiles, and system data</p>
+      <p>Manage matchmakers and users</p>
     </div>
-    <div class="menu-card" onclick="window.location.hash = '#/security'">
+
+    <!-- Login History -->
+    <div class="menu-card" onclick="window.location.hash='#/login-history'">
+      <h2>Login History</h2>
+      <p>View your recent login activity</p>
+    </div>
+
+    <!-- Security -->
+    <div class="menu-card" onclick="window.location.hash='#/security'">
       <h2>Security</h2>
-      <p>Update password and account settings</p>
+      <p>Password and account settings</p>
     </div>
-
-
-</div>
+  </div>
 </div>

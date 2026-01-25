@@ -1,0 +1,106 @@
+<div class="max-w-7xl mx-auto p-2 md:p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Manage Question Bank</h1>
+    <button id="btnAddQuestion" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 text-sm font-medium">
+      + Add Question
+    </button>
+  </div>
+
+  <!-- Data Table -->
+  <div class="bg-white shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Question</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key / Type</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flags</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="qbList" class="bg-white divide-y divide-gray-200">
+        <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="qbModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+      <h3 class="text-lg font-semibold text-gray-800" id="qbModalTitle">Add Question</h3>
+      <button id="qbModalClose" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    
+    <div class="p-6 space-y-4 overflow-y-auto">
+      <form id="qbForm" class="space-y-4">
+        <input type="hidden" id="qb_id" />
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Question Text</label>
+            <input type="text" id="qb_text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required autofocus />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Field Key (unique)</label>
+            <input type="text" id="qb_key" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Category</label>
+            <select id="qb_category" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+              <option value="profile">Profile</option>
+              <option value="preferences">Preferences</option>
+              <option value="onboarding">Onboarding</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Control Type</label>
+            <select id="qb_control" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+              <option value="input">Text Input</option>
+              <option value="textarea">Text Area</option>
+              <option value="dropdown">Dropdown</option>
+              <option value="radio">Radio Buttons</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Sort Order</label>
+            <input type="number" id="qb_sort" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="10" />
+          </div>
+        </div>
+
+        <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Message (Subscript)</label>
+            <input type="text" id="qb_message" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+        </div>
+
+        <div class="flex gap-6">
+          <label class="flex items-center">
+            <input type="checkbox" id="qb_active" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked />
+            <span class="ml-2 text-sm text-gray-900">Is Active</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="qb_required" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+            <span class="ml-2 text-sm text-gray-900">Is Required</span>
+          </label>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Options (JSON Array)</label>
+          <p class="text-xs text-gray-500 mb-1">For Dropdown/Radio. E.g. ["Yes", "No"] or [{"key":"A", "label":"Option A"}]</p>
+          <textarea id="qb_options" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 font-mono text-sm"></textarea>
+        </div>
+      </form>
+    </div>
+
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+      <button id="qbCancel" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium">Cancel</button>
+      <button id="qbSave" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm">Save</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+{
+  "onboarding": [
+    {
+      "id": "q1",
+      "question": "What is your current occupation?",
+      "type": "text",
+      "isActive": true
+    },
+    {
+      "id": "q2",
+      "question": "Briefly describe your family background.",
+      "type": "textarea",
+      "isActive": true
+    }
+  ],
+  "preferences": []
+}
