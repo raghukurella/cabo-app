@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+import noUiSlider from 'https://esm.sh/nouislider@15.7.1';
 
 let questions = [];
 let currentIndex = 0;
@@ -15,6 +16,15 @@ export async function init() {
   if (!container) {
     console.error("Onboarding container not found");
     return;
+  }
+
+  // Inject noUiSlider CSS if not present
+  if (!document.getElementById("nouislider-css")) {
+    const link = document.createElement("link");
+    link.id = "nouislider-css";
+    link.rel = "stylesheet";
+    link.href = "https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css";
+    document.head.appendChild(link);
   }
 
   container.innerHTML = "<div class='text-center text-gray-500'>Loading questions...</div>";
@@ -254,6 +264,48 @@ function renderStep() {
       
       inputEl.appendChild(label);
     });
+  } else if (type === "range_dual") {
+    inputEl = document.createElement("div");
+    inputEl.className = "px-2 py-8"; // Padding for handles/tooltips
+
+    const sliderDiv = document.createElement("div");
+    inputEl.appendChild(sliderDiv);
+
+    // Parse options for min/max (Default: 18-99)
+    let min = 18, max = 99;
+    if (q.options && Array.isArray(q.options) && q.options.length >= 2) {
+       min = Number(q.options[0]);
+       max = Number(q.options[1]);
+    }
+
+    // Parse saved value "25-30" or default to middle range
+    let start = [Math.floor(min + (max-min)*0.2), Math.floor(max - (max-min)*0.2)];
+    if (savedValue) {
+       const parts = savedValue.split("-").map(Number);
+       if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+         start = parts;
+       }
+    }
+
+    noUiSlider.create(sliderDiv, {
+      start: start,
+      connect: true,
+      range: { 'min': min, 'max': max },
+      step: 1,
+      tooltips: true,
+      format: {
+        to: (v) => Math.round(v),
+        from: (v) => Number(v)
+      }
+    });
+
+    // Store reference to slider on the wrapper for saving
+    inputEl.slider = sliderDiv.noUiSlider;
+  } else if (type === "datetime") {
+      inputEl = document.createElement("input");
+      inputEl.type = "datetime-local";
+      inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
+      inputEl.value = savedValue;
   } else if (type === "textarea") {
       inputEl = document.createElement("textarea");
       inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
@@ -306,6 +358,10 @@ function saveCurrentAnswer() {
             // Join multiple values with comma
             val = Array.from(checkedBoxes).map(cb => cb.value).join(",");
         }
+    } else if (type === "range_dual") {
+        const el = document.getElementById("currentInput");
+        // noUiSlider.get() returns array of strings ["20", "30"]
+        if (el && el.slider) val = el.slider.get().join("-");
     } else {
         const el = document.getElementById("currentInput");
         if (el) val = el.value.trim();
