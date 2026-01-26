@@ -9,14 +9,48 @@ export async function init() {
   console.log("🚀 Onboarding init started (Wizard Mode)");
   const container = document.getElementById("onboardingContainer");
   const staticBtn = document.getElementById("finishOnboardingBtn");
-
+  
   // Hide the static button from HTML since we will manage navigation dynamically
   if (staticBtn) staticBtn.style.display = "none";
-
+  
   if (!container) {
     console.error("Onboarding container not found");
     return;
   }
+
+  // --- Event Delegation for Navigation ---
+  // Attach one listener to the parent container to handle all button clicks
+  container.addEventListener('click', async (e) => {
+    console.log("Click detected on container. Target:", e.target);
+
+    const backBtn = e.target.closest('#onboardingBack');
+    const nextBtn = e.target.closest('#onboardingNext');
+    const exitBtn = e.target.closest('#onboardingExit');
+
+    if (backBtn && !backBtn.disabled) {
+        console.log("Back button clicked (delegated)");
+        handleBack();
+    }
+
+    if (nextBtn && !nextBtn.disabled) {
+        console.log("Next/Complete button clicked (delegated)");
+        const originalText = nextBtn.textContent;
+        nextBtn.textContent = "Processing...";
+        nextBtn.disabled = true;
+        await handleNext();
+        // Restore button if still on page
+        if (document.body.contains(nextBtn)) {
+            nextBtn.textContent = originalText;
+            nextBtn.disabled = false;
+        }
+    }
+
+    if (exitBtn) {
+        console.log("Save & Exit button clicked (delegated)");
+        await saveProgress(currentIndex);
+        window.location.hash = exitBtn.dataset.redirectUrl || "#/my-profiles";
+    }
+  });
 
   // Inject noUiSlider CSS if not present
   if (!document.getElementById("nouislider-css")) {
@@ -99,6 +133,7 @@ function renderStep() {
   const container = document.getElementById("onboardingContainer");
   if (!container) return;
   container.innerHTML = "";
+  console.log(`Rendering step: ${currentIndex} (type: ${questions[currentIndex]?.control_type})`);
 
   const q = questions[currentIndex];
   const total = questions.length;
@@ -306,6 +341,12 @@ function renderStep() {
       inputEl.type = "datetime-local";
       inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
       inputEl.value = savedValue;
+  } else if (type === "label") {
+      inputEl = document.createElement("div");
+      inputEl.className = "w-full text-lg text-gray-700 text-center whitespace-pre-wrap px-4";
+      if (q.options && Array.isArray(q.options) && q.options.length > 0) {
+          inputEl.textContent = q.options[0];
+      }
   } else if (type === "textarea") {
       inputEl = document.createElement("textarea");
       inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
@@ -324,23 +365,36 @@ function renderStep() {
 
   // 4. Navigation
   const navContainer = document.createElement("div");
-  navContainer.className = "flex justify-between items-center mt-auto pt-4 border-t border-gray-100";
-
+  navContainer.className = "flex justify-between items-center mt-auto pt-4 border-t border-gray-100 relative z-50";
+  
   // Back Button
   const backBtn = document.createElement("button");
-  backBtn.className = `px-6 py-2 rounded-lg font-medium transition-colors ${currentIndex === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'}`;
+  backBtn.type = "button";
+  backBtn.id = "onboardingBack";
+  backBtn.className = `pointer-events-auto flex-shrink-0 px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer ${currentIndex === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'}`;
   backBtn.textContent = "Back";
   backBtn.disabled = currentIndex === 0;
-  backBtn.onclick = handleBack;
   navContainer.appendChild(backBtn);
-
+  
+  // Render Exit Link if defined in options[1] for Label type
+  if (type === "label" && q.options && q.options.length > 1) {
+    const saveExitBtn = document.createElement("button");
+    saveExitBtn.type = "button";
+    saveExitBtn.id = "onboardingExit";
+    saveExitBtn.className = "pointer-events-auto text-gray-500 font-medium hover:text-gray-700 hover:underline px-4 text-sm text-center mx-2 cursor-pointer";
+    saveExitBtn.textContent = q.options[1]; // Use text from JSON
+    saveExitBtn.dataset.redirectUrl = q.options[2] || "#/my-profiles";
+    navContainer.appendChild(saveExitBtn);
+  }
+  
   // Next/Finish Button
   const nextBtn = document.createElement("button");
-  nextBtn.className = "bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all transform hover:-translate-y-0.5";
+  nextBtn.type = "button";
+  nextBtn.id = "onboardingNext";
+  nextBtn.className = "pointer-events-auto flex-shrink-0 bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer";
   nextBtn.textContent = currentIndex === total - 1 ? "Complete" : "Continue";
-  nextBtn.onclick = handleNext;
   navContainer.appendChild(nextBtn);
-
+  
   container.appendChild(navContainer);
 }
 
@@ -362,9 +416,11 @@ function saveCurrentAnswer() {
         const el = document.getElementById("currentInput");
         // noUiSlider.get() returns array of strings ["20", "30"]
         if (el && el.slider) val = el.slider.get().join("-");
+    } else if (type === "label") {
+        // No value to save for static labels
     } else {
         const el = document.getElementById("currentInput");
-        if (el) val = el.value.trim();
+        if (el && typeof el.value !== 'undefined') val = el.value.trim();
     }
     
     if (val) {
@@ -441,6 +497,27 @@ async function finishOnboarding() {
     console.log("Collected Answers:", answers);
     
     const { data: { user } } = await supabase.auth.getUser();
+
+    // Reset progress to 0 so the user starts from the beginning next time
+    if (user) {
+        const { error } = await supabase
+            .schema("cabo")
+            .from("mj_prospect")
+            .update({ current_step: 0 })
+            .eq("auth_id", user.id);
+        if (error) console.error("Error resetting progress:", error);
+    } else {
+        const localData = localStorage.getItem("mm_onboarding_progress");
+        if (localData) {
+            try {
+                const progress = JSON.parse(localData);
+                progress.current_step = 0;
+                localStorage.setItem("mm_onboarding_progress", JSON.stringify(progress));
+            } catch (e) {
+                console.warn("Error resetting local progress", e);
+            }
+        }
+    }
     
     if (!user) {
       if (confirm("You've completed the questions! Create an account to save your profile?")) {

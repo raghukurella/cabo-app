@@ -2,6 +2,7 @@ import { supabase } from "./supabase.js";
 import Sortable from 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js';
 
 let questions = [];
+let sortableInstance = null;
 
 export async function init() {
   const btnAdd = document.getElementById("btnAddQuestion");
@@ -9,6 +10,7 @@ export async function init() {
   const btnCancel = document.getElementById("qbCancel");
   const btnSave = document.getElementById("qbSave");
   const btnDelete = document.getElementById("qbDelete");
+  const chkShowInactive = document.getElementById("showInactive");
   const modal = document.getElementById("qbModal");
 
   if (btnAdd) btnAdd.addEventListener("click", () => openModal());
@@ -16,6 +18,7 @@ export async function init() {
   if (btnCancel) btnCancel.addEventListener("click", closeModal);
   if (btnSave) btnSave.addEventListener("click", handleSave);
   if (btnDelete) btnDelete.addEventListener("click", () => handleDelete());
+  if (chkShowInactive) chkShowInactive.addEventListener("change", renderQuestions);
 
   // Close on click outside
   if (modal) {
@@ -54,12 +57,16 @@ function renderQuestions() {
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  if (questions.length === 0) {
+  // Filter based on checkbox
+  const showInactive = document.getElementById("showInactive")?.checked;
+  const displayQuestions = showInactive ? questions : questions.filter(q => q.is_active);
+
+  if (displayQuestions.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No questions found.</td></tr>';
     return;
   }
 
-  questions.forEach(q => {
+  displayQuestions.forEach(q => {
     const tr = document.createElement("tr");
     tr.className = "hover:bg-gray-50 transition-colors";
     tr.dataset.id = q.id; // Add ID to the row for reordering
@@ -100,8 +107,10 @@ function renderQuestions() {
     tbody.appendChild(tr);
   });
 
+  if (sortableInstance) sortableInstance.destroy();
+
   // Initialize SortableJS
-  new Sortable(tbody, {
+  sortableInstance = new Sortable(tbody, {
     handle: '.drag-handle', // Restrict drag start to the handle
     animation: 150,
     onEnd: async function (evt) {
