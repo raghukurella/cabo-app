@@ -4,6 +4,7 @@ import noUiSlider from 'https://esm.sh/nouislider@15.7.1';
 let questions = [];
 let currentIndex = 0;
 let answers = {};
+let autoAdvanceTimer = null;
 
 export async function init() {
   console.log("🚀 Onboarding init started (Wizard Mode)");
@@ -17,6 +18,27 @@ export async function init() {
     console.error("Onboarding container not found");
     return;
   }
+
+  // --- Event Delegation for Auto-Advance ---
+  container.addEventListener('change', (e) => {
+    const radio = e.target.closest('input[type="radio"]');
+    const dropdown = e.target.closest('select');
+
+    // Check if the target is a radio button or a dropdown with a selected value
+    if (radio || (dropdown && dropdown.value)) {
+        console.log("Auto-advance triggered by:", e.target.tagName);
+        
+        // ⭐ Check for conditional input on radio
+        if (radio && radio.dataset.conditionalId) {
+            console.log("Auto-advance skipped due to conditional input");
+            return; 
+        }
+
+        if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+        // Set a timer to advance, giving user feedback time
+        autoAdvanceTimer = setTimeout(() => handleNext(), 400);
+    }
+  });
 
   // --- Event Delegation for Navigation ---
   // Attach one listener to the parent container to handle all button clicks
@@ -51,6 +73,22 @@ export async function init() {
         window.location.hash = exitBtn.dataset.redirectUrl || "#/my-profiles";
     }
   });
+
+  // --- Review / Test Button Logic ---
+  const reviewBtn = document.getElementById("reviewAnswersBtn");
+  const reviewModal = document.getElementById("reviewModal");
+  const closeReviewBtn = document.getElementById("closeReviewBtn");
+  const closeReviewBtnBottom = document.getElementById("closeReviewBtnBottom");
+
+  if (reviewBtn && reviewModal) {
+    reviewBtn.addEventListener("click", () => {
+      saveCurrentAnswer();
+      renderReviewTable();
+      reviewModal.classList.remove("hidden");
+    });
+    if (closeReviewBtn) closeReviewBtn.addEventListener("click", () => reviewModal.classList.add("hidden"));
+    if (closeReviewBtnBottom) closeReviewBtnBottom.addEventListener("click", () => reviewModal.classList.add("hidden"));
+  }
 
   // Inject noUiSlider CSS if not present
   if (!document.getElementById("nouislider-css")) {
@@ -133,6 +171,9 @@ function renderStep() {
   const container = document.getElementById("onboardingContainer");
   if (!container) return;
   container.innerHTML = "";
+  
+  // Clear any pending auto-advance from previous step
+  if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
   console.log(`Rendering step: ${currentIndex} (type: ${questions[currentIndex]?.control_type})`);
 
   const q = questions[currentIndex];
@@ -149,16 +190,7 @@ function renderStep() {
   const title = document.createElement("h2");
   title.className = "text-2xl font-bold text-gray-800 mb-6 text-center";
 
-  // Interpolate placeholders like {{first_name}}
-  let displayText = q.question_text || "";
-  displayText = displayText.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    const sourceQ = questions.find(item => item.field_key === key);
-    if (sourceQ && answers[sourceQ.id]) {
-      return answers[sourceQ.id];
-    }
-    return match;
-  });
-  title.textContent = displayText;
+  title.textContent = interpolateText(q.question_text);
 
   if (q.is_required) {
     const span = document.createElement("span");
@@ -172,7 +204,7 @@ function renderStep() {
   if (q.message) {
     const msg = document.createElement("p");
     msg.className = "text-sm text-gray-500 text-center mb-6 -mt-4";
-    msg.textContent = q.message;
+    msg.textContent = interpolateText(q.message);
     container.appendChild(msg);
   }
 
@@ -211,6 +243,15 @@ function renderStep() {
     radioOptions.forEach(opt => {
       const val = typeof opt === "object" ? (opt.key || opt.value || opt.label) : opt;
       const lbl = typeof opt === "object" ? (opt.label || opt.value || opt.key) : opt;
+      const conditionalInputLabel = (typeof opt === "object" && opt.conditional_input) ? opt.conditional_input : null;
+
+      // Check if this option is selected (exact match OR starts with val + ": " for conditional)
+      let isSelected = savedValue === val;
+      let savedText = "";
+      if (conditionalInputLabel && savedValue.startsWith(val + ": ")) {
+          isSelected = true;
+          savedText = savedValue.substring(val.length + 2);
+      }
 
       const label = document.createElement("label");
       label.className = `flex items-center p-4 border rounded-xl cursor-pointer transition-all select-none`;
@@ -220,10 +261,10 @@ function renderStep() {
       radio.name = `q_${q.id}`;
       radio.value = val;
       radio.className = "hidden";
-      if (savedValue === val) radio.checked = true;
+      if (isSelected) radio.checked = true;
       
       // Initial styling
-      if (savedValue === val) {
+      if (isSelected) {
           label.classList.add('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
       } else {
           label.classList.add('border-gray-200', 'hover:bg-gray-50');
@@ -240,6 +281,11 @@ function renderStep() {
          label.classList.add('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
       });
 
+      if (conditionalInputLabel) {
+          const condId = `cond_${q.id}_${String(val).replace(/[^a-zA-Z0-9]/g, '_')}`;
+          radio.dataset.conditionalId = condId;
+      }
+
       label.appendChild(radio);
       
       const span = document.createElement("span");
@@ -248,6 +294,50 @@ function renderStep() {
       label.appendChild(span);
 
       inputEl.appendChild(label);
+
+      // Render conditional input container
+      if (conditionalInputLabel) {
+          const condId = radio.dataset.conditionalId;
+          const condDiv = document.createElement("div");
+          condDiv.id = condId;
+          condDiv.className = isSelected ? "ml-4 mb-4" : "ml-4 mb-4 hidden";
+          
+          const condLabel = document.createElement("label");
+          condLabel.className = "block text-sm text-gray-600 mb-1 font-medium";
+          condLabel.textContent = conditionalInputLabel;
+          
+          const condInput = document.createElement("input");
+          condInput.type = "text";
+          condInput.className = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none";
+          condInput.value = savedText;
+          // Prevent auto-advance bubbling from text input
+          condInput.addEventListener("change", (e) => e.stopPropagation());
+
+          condDiv.appendChild(condLabel);
+          condDiv.appendChild(condInput);
+          inputEl.appendChild(condDiv);
+      }
+    });
+
+    // Event listener to toggle conditional inputs
+    inputEl.addEventListener('change', (e) => {
+        if (e.target.type === 'radio') {
+            const radios = inputEl.querySelectorAll('input[type="radio"]');
+            radios.forEach(r => {
+                if (r.dataset.conditionalId) {
+                    const el = document.getElementById(r.dataset.conditionalId);
+                    if (el) {
+                        if (r.checked) {
+                            el.classList.remove('hidden');
+                            const txt = el.querySelector('input');
+                            if (txt) txt.focus();
+                        } else {
+                            el.classList.add('hidden');
+                        }
+                    }
+                }
+            });
+        }
     });
   } else if (type === "checkbox") {
     inputEl = document.createElement("div");
@@ -345,7 +435,7 @@ function renderStep() {
       inputEl = document.createElement("div");
       inputEl.className = "w-full text-lg text-gray-700 text-center whitespace-pre-wrap px-4";
       if (q.options && Array.isArray(q.options) && q.options.length > 0) {
-          inputEl.textContent = q.options[0];
+          inputEl.textContent = interpolateText(q.options[0]);
       }
   } else if (type === "textarea") {
       inputEl = document.createElement("textarea");
@@ -405,7 +495,17 @@ function saveCurrentAnswer() {
 
     if (type === "radio") {
         const checked = document.querySelector(`input[name="q_${q.id}"]:checked`);
-        if (checked) val = checked.value;
+        if (checked) {
+            val = checked.value;
+            // Check for conditional text
+            if (checked.dataset.conditionalId) {
+                const condDiv = document.getElementById(checked.dataset.conditionalId);
+                const textInput = condDiv?.querySelector('input');
+                if (textInput && textInput.value.trim()) {
+                    val += ": " + textInput.value.trim();
+                }
+            }
+        }
     } else if (type === "checkbox") {
         const checkedBoxes = document.querySelectorAll(`input[name="q_${q.id}"]:checked`);
         if (checkedBoxes.length > 0) {
@@ -528,4 +628,32 @@ async function finishOnboarding() {
 
     // Redirect to profiles (saving logic can be added here later)
     window.location.hash = "#/my-profiles";
+}
+
+function renderReviewTable() {
+  const tbody = document.getElementById("reviewTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  questions.forEach(q => {
+    const ans = answers[q.id] || "<span class='text-gray-400 italic'>-</span>";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${q.sort_order}</td>
+      <td class="px-6 py-4 text-sm text-gray-900">${interpolateText(q.question_text)}</td>
+      <td class="px-6 py-4 text-sm text-gray-700 font-medium">${ans}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function interpolateText(text) {
+  if (!text) return "";
+  return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    const sourceQ = questions.find(item => item.field_key === key);
+    if (sourceQ && answers[sourceQ.id]) {
+      return answers[sourceQ.id];
+    }
+    return match;
+  });
 }

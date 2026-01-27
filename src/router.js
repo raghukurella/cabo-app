@@ -57,8 +57,8 @@ const routeTable = [
   { pattern: /^#\/questions-manage\/?$/, page: "pages/questions-manage.html", script: "questions-manage.js", auth: true },
   { pattern: /^#\/all-profiles\/?$/, page: "pages/all-profiles.html", script: "all-profiles.js", auth: true },
   { pattern: /^#\/prospect\/?$/, page: "pages/prospect.html", script: "prospect.js", auth: true },
-  { pattern: /^#\/onboarding\/?$/, page: "pages/onboarding.html", script: "onboarding.js", auth: true },
-  { pattern: /^#\/manage_question_bank\/?$/, page: "pages/manage_question_bank.html", script: "manage_question_bank.js", auth: true },
+  { pattern: /^#\/onboarding(\.html)?\/?$/, page: "pages/onboarding.html", script: "onboarding.js", auth: false },
+  { pattern: /^#\/manage_question_bank(\.html)?\/?$/, page: "pages/manage_question_bank.html", script: "manage_question_bank.js", auth: false },
 
   // Create mode (no profileId)
   {
