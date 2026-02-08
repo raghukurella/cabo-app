@@ -1,40 +1,37 @@
-
-  import { supabase } from "./supabase.js";
-  const btn = document.getElementById("loginBtn");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-
+import { supabase } from "./supabase.js";
 
 console.log("🔥 login.js LOADED");
 
-  export function init() {
-    console.log("login.js init running");
+export function init() {
+  console.log("login.js init running");
 
-    const btn = document.getElementById("loginBtn");
-    if (!btn) return;
+  const btn = document.getElementById("loginBtn");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const rememberMeInput = document.getElementById("rememberMe");
 
-    btn.addEventListener("click", async () => {
-      // your login logic here
-    });
-  }
+  if (!btn) return;
 
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
 
     const email = emailInput.value.trim();
     const password = passwordInput.value;
+    const remember = rememberMeInput ? rememberMeInput.checked : true;
 
     if (!email || !password) {
       alert("Please enter email and password");
       return;
     }
 
+    // Set persistence based on checkbox
+    await window.supabase.auth.setPersistence(remember ? 'local' : 'session');
+
     // ✅ Attempt login
     const { data, error } = await window.supabase.auth.signInWithPassword({
       email,
       password
     });
-
 
     if (error) {
       alert(error.message);
@@ -63,5 +60,6 @@ console.log("🔥 login.js LOADED");
     } catch (err) { console.error("Tracking failed", err); }
 
     // ✅ Redirect to dashboard or profile
-    window.location.hash = "#/my-profiles";
+    window.location.hash = "#/";
   });
+}

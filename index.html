@@ -38,17 +38,33 @@
   </button>
 
   <!-- Right: Navigation links -->
-  <nav id="mainMenu" class="hidden md:flex gap-6 text-red-600 font-medium">
-    <a href="#/my-profiles">My Profiles</a>
-    <a href="#/logout">Log out</a>
-    <a href="#/home" class="text-blue-600">&lt; home</a>
-  </nav>
+  <div class="hidden md:relative md:block">
+    <button type="button" id="userMenuBtn" class="flex items-center gap-2 rounded-full bg-white p-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 hover:bg-gray-50">
+      <span class="sr-only">Open user menu</span>
+      <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </div>
+      <span class="font-medium text-gray-700">Account</span>
+      <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+    </button>
+
+    <div id="userMenuDropdown" class="hidden absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+      <a href="#/my-profiles" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profiles</a>
+      <a href="#/process-biodata" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Add New Profile</a>
+      <a href="#/home" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Home</a>
+      <div class="border-t border-gray-100 my-1"></div>
+      <a href="#/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Log out</a>
+    </div>
+  </div>
 </header>
 
 <!-- Mobile dropdown -->
-<nav id="mobileMenu" class="hidden flex-col bg-white border-b border-gray-200 px-4 py-3 md:hidden">
+<nav id="mobileMenu" class="hidden absolute top-16 left-0 w-full z-50 flex flex-col bg-white border-b border-gray-200 px-4 py-3 shadow-lg md:hidden">
   <a href="#/home" class="py-1 text-blue-600">home</a>
   <a href="#/my-profiles" class="py-1 text-blue-600">my profiles</a>
+  <a href="#/process-biodata" class="py-1 text-blue-600">process biodata</a>
   <a href="#/logout" class="py-1 text-red-600">log out</a>
 </nav>
 
@@ -67,6 +83,33 @@
     toggle.addEventListener("click", () => {
       mobileMenu.classList.toggle("hidden");
     });
+
+    // Close menu when a link is clicked
+    mobileMenu.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => mobileMenu.classList.add("hidden"));
+    });
+
+    // Desktop User Menu Dropdown
+    const userMenuBtn = document.getElementById("userMenuBtn");
+    const userMenuDropdown = document.getElementById("userMenuDropdown");
+
+    if (userMenuBtn && userMenuDropdown) {
+      userMenuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        userMenuDropdown.classList.toggle("hidden");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!userMenuBtn.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+          userMenuDropdown.classList.add("hidden");
+        }
+      });
+
+      // Close on link click
+      userMenuDropdown.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => userMenuDropdown.classList.add("hidden"));
+      });
+    }
   </script>
 
 </body>

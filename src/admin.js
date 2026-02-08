@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+import { initPhoneInput } from "./profile_helpers.js";
 
 // These will be null on first load — that's OK.
 // We will re-query them inside initAdmin() after the DOM is ready.
@@ -36,6 +37,9 @@ if (!adminGate || !adminContent) {
   if (!user) return;
 
   await loadMatchmakers();
+
+  // Init create form phone
+  await initPhoneInput(document.getElementById("mm_phone"));
 }
 
 async function requireAdmin() {
@@ -98,7 +102,7 @@ async function loadMatchmakers() {
   data.forEach(renderMatchmakerRow);
 }
 
-function renderMatchmakerRow(m) {
+async function renderMatchmakerRow(m) {
   const container = document.createElement("div");
   container.className =
     "rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm";
@@ -138,6 +142,9 @@ function renderMatchmakerRow(m) {
       openEditPanel(m, panel);
     }
   });
+
+  // Init edit form phone
+  await initPhoneInput(panel.querySelector("[data-mm-edit-phone]"));
 
   matchmakerList.appendChild(container);
 }
@@ -200,7 +207,9 @@ function openEditPanel(m, panel) {
       first_name: firstInput.value.trim() || null,
       last_name: lastInput.value.trim() || null,
       email: emailInput.value.trim() || null,
-      phone: phoneInput.value.trim() || null,
+      phone: phoneInput._iti 
+        ? phoneInput._iti.getNumber() 
+        : phoneInput.value.trim() || null,
       updated_at: new Date().toISOString()
     };
 
@@ -226,7 +235,8 @@ async function createMatchmaker() {
   const first = document.getElementById("mm_first").value.trim();
   const last = document.getElementById("mm_last").value.trim();
   const email = document.getElementById("mm_email").value.trim();
-  const phone = document.getElementById("mm_phone").value.trim();
+  const phoneEl = document.getElementById("mm_phone");
+  const phone = phoneEl._iti ? phoneEl._iti.getNumber() : phoneEl.value.trim();
 
   if (!first || !last || !email) {
     createStatus.textContent =

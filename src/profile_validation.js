@@ -5,13 +5,25 @@ export function profile_validateForm() {
   let valid = true;
   const requiredFields = document.querySelectorAll("#profileForm input[required], #profileForm select[required]");
   requiredFields.forEach(field => {
-    if (!field.value.trim()) {
+    let isFieldValid = true;
+    let errorMsg = "This field is required.";
+
+    if (field.type === "tel" && field._iti) {
+      if (!field._iti.isValidNumber()) {
+        isFieldValid = false;
+        errorMsg = "Invalid phone number.";
+      }
+    } else if (!field.value.trim()) {
+      isFieldValid = false;
+    }
+
+    if (!isFieldValid) {
       valid = false;
       field.classList.add("border-red-500");
       if (!field.nextElementSibling || !field.nextElementSibling.classList.contains("error-msg")) {
         const helper = document.createElement("p");
         helper.className = "error-msg text-xs text-red-600 mt-1";
-        helper.textContent = "This field is required.";
+        helper.textContent = errorMsg;
         field.insertAdjacentElement("afterend", helper);
       }
       const section = field.closest("[id^='section']");

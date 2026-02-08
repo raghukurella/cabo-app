@@ -1,5 +1,6 @@
 import { supabase } from "./supabase.js";
 import noUiSlider from 'https://esm.sh/nouislider@15.7.1';
+import { initPhoneInput } from "./profile_helpers.js";
 
 let questions = [];
 let currentIndex = 0;
@@ -437,6 +438,17 @@ function renderStep() {
       if (q.options && Array.isArray(q.options) && q.options.length > 0) {
           inputEl.textContent = interpolateText(q.options[0]);
       }
+  } else if (type === "tel") {
+      inputEl = document.createElement("input");
+      inputEl.type = "tel";
+      inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
+      inputEl.value = savedValue;
+      setTimeout(() => initPhoneInput(inputEl), 0);
+  } else if (type === "email") {
+      inputEl = document.createElement("input");
+      inputEl.type = "email";
+      inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
+      inputEl.value = savedValue;
   } else if (type === "textarea") {
       inputEl = document.createElement("textarea");
       inputEl.className = "w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow";
@@ -516,6 +528,20 @@ function saveCurrentAnswer() {
         const el = document.getElementById("currentInput");
         // noUiSlider.get() returns array of strings ["20", "30"]
         if (el && el.slider) val = el.slider.get().join("-");
+    } else if (type === "tel") {
+        const el = document.getElementById("currentInput");
+        if (el && el._iti) {
+            val = el._iti.getNumber(); // Get full international format
+        } else if (el) {
+            val = el.value.trim();
+        }
+    } else if (type === "email") {
+        const el = document.getElementById("currentInput");
+        if (el && el._iti) {
+            val = el._iti.getNumber(); // Get full international format
+        } else if (el) {
+            val = el.value.trim();
+        }
     } else if (type === "label") {
         // No value to save for static labels
     } else {
@@ -537,15 +563,38 @@ async function handleNext() {
     const existingErr = document.getElementById("onboardingError");
     if (existingErr) existingErr.remove();
 
-    if (q.is_required && !answers[q.id]) {
+    const showError = (msg) => {
         const container = document.getElementById("onboardingContainer");
         const inputWrapper = container.querySelector(".max-w-md");
         const err = document.createElement("div");
         err.id = "onboardingError";
         err.className = "text-red-500 text-sm text-center mt-2";
-        err.textContent = "This field is required.";
+        err.textContent = msg;
         if (inputWrapper) inputWrapper.appendChild(err);
+    };
+
+    if (q.is_required && !answers[q.id]) {
+        showError("This field is required.");
         return;
+    }
+
+    // Phone validation
+    const type = (q.control_type || "input").toLowerCase();
+    if (type === "tel") {
+        const el = document.getElementById("currentInput");
+        if (el && el._iti && el.value.trim() && !el._iti.isValidNumber()) {
+            showError("Invalid phone number.");
+            return;
+        }
+    }
+
+    // Email validation
+    if (type === "email" && answers[q.id]) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(answers[q.id])) {
+            showError("Please enter a valid email address.");
+            return;
+        }
     }
 
     // Save state to DB

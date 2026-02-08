@@ -1,0 +1,25 @@
+<div class="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Upload Raw Biodata</h1>
+  
+  <form id="biodataForm" class="space-y-6">
+    
+    <!-- Raw Text Input -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Paste Biodata Text (WhatsApp/Email)</label>
+      <textarea id="rawText" rows="10" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Paste the raw text here..."></textarea>
+    </div>
+
+    <!-- File Upload -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Or Upload File (PDF, Word, Image)</label>
+      <input type="file" id="rawFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block w-full text-sm text-gray-500
+        file:mr-4 file:py-2 file:px-4
+        file:rounded-full file:border-0
+        file:text-sm file:font-semibold
+        file:bg-blue-50 file:text-blue-700
+        hover:file:bg-blue-100"/>
+    </div>
+
+    <button type="submit" class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Submit Raw Data</button>
+  </form>
+</div>

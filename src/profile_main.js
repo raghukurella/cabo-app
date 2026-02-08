@@ -4,7 +4,7 @@ import { profile_loadQuestions, profile_saveQuestions } from "./profile_question
 import { qs, showStatus } from "./profile_helpers.js";
 import { setPhotoUrls, getEditingProfileId, setEditingProfileId } from "./profile_state.js";
 import { profile_renderPhotoSlots, profile_attachPhotoUpload } from "./profile_photos.js";
-import { profile_populateHeightOptionsFor } from "./profile_height.js";
+import { profile_populateHeightOptionsFor, initPhoneInput } from "./profile_height.js"; // Note: Importing from helpers actually, fixing path below
 import { profile_attachShareButton } from "./profile_share.js";
 import { profile_validateForm } from "./profile_validation.js";
 
@@ -73,8 +73,8 @@ export async function profile_init(personId = null) {
   const { profile_renderPhotoSlots, profile_attachPhotoUpload } =
     await import("./profile_photos.js");
 
-  const { profile_populateHeightOptions } =
-    await import("./profile_height.js");
+  const { profile_populateHeightOptions, initPhoneInput } =
+    await import("./profile_helpers.js");
 
   // ⭐ Now safe to run edit-page logic
   setEditingProfileId(personId);
@@ -83,6 +83,7 @@ export async function profile_init(personId = null) {
   //await profile_populateHeightOptions();
   //await profile_populateHeightOptionsFor("#height");
   await profile_populateHeightOptionsFor(document.getElementById("height"));
+  await initPhoneInput(document.getElementById("phone_number"));
 
   if (id) {
 

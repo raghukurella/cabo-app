@@ -1,0 +1,23 @@
+<div class="max-w-5xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6 mb-12">
+  <div class="flex justify-between items-center mb-6 border-b pb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Review & Edit Biodata</h1>
+      <p class="text-sm text-gray-500 mt-1">Review the AI-parsed data and make corrections before saving.</p>
+    </div>
+    <div id="statusMessage" class="text-sm font-medium"></div>
+  </div>
+
+  <div id="loadingState" class="text-center py-10 text-gray-500">
+    Loading preview...
+  </div>
+
+  <form id="previewForm" class="hidden space-y-8">
+    <!-- Fields will be injected here by JS -->
+    <div id="fieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+    <div class="sticky bottom-0 bg-white border-t pt-4 pb-2 flex justify-end gap-4 z-10">
+      <button type="button" onclick="window.history.back()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Cancel</button>
+      <button type="submit" id="saveFinalBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium shadow-sm">Save Final Profile</button>
+    </div>
+  </form>
+</div>

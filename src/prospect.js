@@ -1,5 +1,6 @@
 import { supabase } from "./supabase.js";
 import { profile_populateHeightOptionsFor } from "./profile_height.js";
+import { initPhoneInput } from "./profile_helpers.js";
 
 let allQuestions = [];
 
@@ -17,6 +18,9 @@ export async function init() {
   if (heightSelect) {
     profile_populateHeightOptionsFor(heightSelect);
   }
+
+  // Init Phone
+  await initPhoneInput(document.getElementById("p_phone"));
 
   // Immigration Logic
   const cit = document.getElementById("p_citizenship");
@@ -173,7 +177,9 @@ async function handleSave(e) {
       first_name: document.getElementById("p_first_name").value.trim(),
       last_name: document.getElementById("p_last_name").value.trim(),
       email: document.getElementById("p_email").value.trim() || null,
-      phone_number: document.getElementById("p_phone").value.trim() || null,
+      phone_number: document.getElementById("p_phone")?._iti 
+        ? document.getElementById("p_phone")._iti.getNumber() 
+        : document.getElementById("p_phone").value.trim() || null,
       gender: document.getElementById("p_gender").value || null,
       datetime_of_birth: document.getElementById("p_dob").value || null,
       height: document.getElementById("p_height").value || null,

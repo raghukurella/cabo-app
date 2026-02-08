@@ -9,7 +9,9 @@ export function profile_buildCreatePayload(user) {
     first_name: qs("first_name").value.trim(),
     last_name: qs("last_name").value.trim(),
     email: qs("email").value.trim() || user.email,
-    phone_number: qs("phone_number").value.trim() || null,
+    phone_number: qs("phone_number")?._iti 
+      ? qs("phone_number")._iti.getNumber() 
+      : qs("phone_number").value.trim() || null,
     place_of_birth: qs("place_of_birth").value.trim() || null,
     current_location: qs("current_location").value.trim() || null,
     bio: qs("bio")?.value?.trim() || null,
@@ -27,7 +29,9 @@ export function profile_buildUpdatePayload() {
     first_name: qs("first_name").value.trim(),
     last_name: qs("last_name").value.trim(),
     email: qs("email").value.trim(),
-    phone_number: qs("phone_number").value.trim() || null,
+    phone_number: qs("phone_number")?._iti 
+      ? qs("phone_number")._iti.getNumber() 
+      : qs("phone_number").value.trim() || null,
     place_of_birth: qs("place_of_birth").value.trim() || null,
     current_location: qs("current_location").value.trim() || null,
     bio: qs("bio")?.value?.trim() || null,

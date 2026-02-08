@@ -22,9 +22,11 @@ async function requireAuth() {
 // ------------------------------------------------------------
 const routeTable = [
   // Public routes
-  { pattern: /^#\/?$/, page: "pages/landing.html", script: null, auth: false },
+  { pattern: /^#\/?$/, page: "pages/landing.html", script: "landing.js", auth: true },
   { pattern: /^#\/login\/?$/, page: "pages/login.html", script: "login.js", auth: false },
-  { pattern: /^#\/signup\/?$/, page: "pages/signup.html", script: null, auth: false },
+  { pattern: /^#\/forgot-password\/?$/, page: "pages/forgot-password.html", script: "forgot-password.js", auth: false },
+  { pattern: /^#\/update-password/, page: "pages/update-password.html", script: "update-password.js", auth: false },
+  { pattern: /^#\/signup\/?$/, page: "pages/signup.html", script: "signup.js", auth: false },
   { pattern: /^#\/search\/?$/, page: "pages/search.html", script: null, auth: false },
   { pattern: /^#\/security\/?$/, page: "pages/security.html", script: null, auth: false },
   { pattern: /^#\/login-history\/?$/, page: "pages/login-history.html", script: "login-history.js", auth: true },
@@ -48,7 +50,14 @@ const routeTable = [
     pattern: /^#\/profilevw\/(.+)$/,
     page: "pages/profile-view.html",
     script: "profile-view.js",
-    auth: true
+    auth: false
+  },
+
+  {
+    pattern: /^#\/details\/(.+)$/,
+    page: "pages/details.html",
+    script: "details.js",
+    auth: false
   },
 
   // Protected static routes
@@ -59,6 +68,10 @@ const routeTable = [
   { pattern: /^#\/prospect\/?$/, page: "pages/prospect.html", script: "prospect.js", auth: true },
   { pattern: /^#\/onboarding(\.html)?\/?$/, page: "pages/onboarding.html", script: "onboarding.js", auth: false },
   { pattern: /^#\/manage_question_bank(\.html)?\/?$/, page: "pages/manage_question_bank.html", script: "manage_question_bank.js", auth: false },
+  { pattern: /^#\/upload-biodata\/?$/, page: "pages/upload-biodata.html", script: "upload-biodata.js", auth: false },
+  { pattern: /^#\/editable-preview(\?.*)?$/, page: "pages/editable-preview.html", script: "editable-preview.js", auth: true },
+  { pattern: /^#\/test-pipeline\/?$/, page: "pages/test-pipeline.html", script: "test-biodata-pipeline.js", auth: false },
+  { pattern: /^#\/process-biodata\/?$/, page: "pages/process-biodata.html", script: "process-biodata.js", auth: false },
 
   // Create mode (no profileId)
   {
@@ -136,7 +149,6 @@ async function loadPage() {
     const { forceLogout } = await import("./forceLogout.js");
     await forceLogout();
     return;
-    ``
   }
 
   // ------------------------------------------------------------
