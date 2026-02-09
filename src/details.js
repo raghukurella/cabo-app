@@ -69,7 +69,6 @@ function populateForm(data) {
   setVal(form, "last_name", data.last_name);
   setVal(form, "gender", data.gender);
   setVal(form, "height", data.height);
-  setVal(form, "citizenship", data.citizenship);
   setVal(form, "current_location", data.current_location);
   setVal(form, "education", data.education);
   setVal(form, "occupation", data.occupation);
@@ -79,6 +78,13 @@ function populateForm(data) {
   setVal(form, "bio", data.bio);
   setVal(form, "family_details", data.family_details);
   setVal(form, "partner_preferences", data.partner_preferences);
+
+  // Citizenship Radios
+  const citVal = data.citizenship || "";
+  const citRadios = form.querySelectorAll('input[name="citizenship"]');
+  citRadios.forEach(cb => {
+    cb.checked = citVal.includes(cb.value);
+  });
 
   // Date handling
   if (data.datetime_of_birth) {
@@ -100,6 +106,17 @@ function populateForm(data) {
 
 function renderPhotos() {
   const photoContainer = document.getElementById("photoContainer");
+  const headerPhoto = document.getElementById("headerProfilePhoto");
+
+  if (headerPhoto) {
+    if (currentPhotos.length > 0 && currentPhotos[0]) {
+      headerPhoto.src = currentPhotos[0];
+    } else {
+      headerPhoto.src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+    }
+    headerPhoto.classList.remove("hidden");
+  }
+
   if (!photoContainer) return;
   photoContainer.innerHTML = "";
   
@@ -154,8 +171,10 @@ function enableEditMode() {
   const inputs = document.querySelectorAll("#detailsForm input, #detailsForm select, #detailsForm textarea");
   inputs.forEach(el => {
     el.disabled = false;
-    el.classList.remove("bg-gray-50");
-    el.classList.add("bg-white", "focus:ring-2", "focus:ring-blue-500", "focus:border-blue-500");
+    if (el.type !== 'checkbox' && el.type !== 'radio') {
+      el.classList.remove("bg-gray-50");
+      el.classList.add("bg-white", "focus:ring-2", "focus:ring-blue-500", "focus:border-blue-500");
+    }
   });
 }
 
@@ -173,8 +192,10 @@ function cancelEdit() {
   const inputs = document.querySelectorAll("#detailsForm input, #detailsForm select, #detailsForm textarea");
   inputs.forEach(el => {
     el.disabled = true;
-    el.classList.add("bg-gray-50");
-    el.classList.remove("bg-white", "focus:ring-2", "focus:ring-blue-500", "focus:border-blue-500");
+    if (el.type !== 'checkbox' && el.type !== 'radio') {
+      el.classList.add("bg-gray-50");
+      el.classList.remove("bg-white", "focus:ring-2", "focus:ring-blue-500", "focus:border-blue-500");
+    }
   });
 
   // Revert data
@@ -191,9 +212,15 @@ async function saveChanges() {
   const formData = new FormData(form);
   const updates = {};
   
-  formData.forEach((value, key) => {
+  // Handle standard fields
+  for (const [key, value] of formData.entries()) {
+    if (key === 'citizenship') continue; // Handle separately
     updates[key] = value.trim() || null;
-  });
+  }
+
+  // Handle Citizenship
+  const citValues = formData.getAll("citizenship");
+  updates.citizenship = citValues.length > 0 ? citValues.join(", ") : null;
 
   // Handle Date
   if (updates.datetime_of_birth) {
@@ -239,8 +266,10 @@ async function saveChanges() {
     const inputs = document.querySelectorAll("#detailsForm input, #detailsForm select, #detailsForm textarea");
     inputs.forEach(el => {
       el.disabled = true;
-      el.classList.add("bg-gray-50");
-      el.classList.remove("bg-white", "focus:ring-2", "focus:ring-blue-500", "focus:border-blue-500");
+      if (el.type !== 'checkbox' && el.type !== 'radio') {
+        el.classList.add("bg-gray-50");
+        el.classList.remove("bg-white", "focus:ring-2", "focus:ring-blue-500", "focus:border-blue-500");
+      }
     });
   }
 }

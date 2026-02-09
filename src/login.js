@@ -17,15 +17,11 @@ export function init() {
 
     const email = emailInput.value.trim();
     const password = passwordInput.value;
-    const remember = rememberMeInput ? rememberMeInput.checked : true;
 
     if (!email || !password) {
       alert("Please enter email and password");
       return;
     }
-
-    // Set persistence based on checkbox
-    await window.supabase.auth.setPersistence(remember ? 'local' : 'session');
 
     // ✅ Attempt login
     const { data, error } = await window.supabase.auth.signInWithPassword({

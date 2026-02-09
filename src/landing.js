@@ -8,6 +8,12 @@ const pageSize = 20;
 export function init() {
   console.log("Landing page init");
 
+  // ✅ Attach listeners early so they work even if sliders/data fail
+  const addProfileBtn = document.getElementById("addProfileBtn");
+  if (addProfileBtn) {
+    addProfileBtn.addEventListener("click", () => window.location.hash = "#/process-biodata");
+  }
+
   // Load noUiSlider CSS dynamically
   if (!document.getElementById("nouislider-css")) {
     const link = document.createElement("link");
@@ -17,7 +23,10 @@ export function init() {
     document.head.appendChild(link);
   }
 
-  initSliders();
+  try {
+    initSliders();
+  } catch (e) { console.error("Slider init failed", e); }
+
   loadOccupationOptions();
   
   const form = document.getElementById("landingSearchForm");
@@ -39,11 +48,6 @@ export function init() {
   const nextBtn = document.getElementById("nextPageBtn");
   if (prevBtn) prevBtn.addEventListener("click", () => changePage(-1));
   if (nextBtn) nextBtn.addEventListener("click", () => changePage(1));
-
-  // Initial load: Show all profiles by default
-  setTimeout(() => {
-    handleShowAll();
-  }, 100);
 }
 
 function initSliders() {
@@ -117,8 +121,8 @@ function handleShowAll() {
   const occupation = document.getElementById("searchOccupation");
   if (occupation) occupation.value = "";
 
-  // Check immigration to show all
-  document.querySelectorAll('input[name="immigration"]').forEach(cb => cb.checked = true);
+  // Uncheck immigration to show all (including nulls)
+  document.querySelectorAll('input[name="immigration"]').forEach(cb => cb.checked = false);
 
   // Reset sliders to full range
   const ageSlider = document.getElementById('ageSlider');
@@ -189,22 +193,27 @@ async function handleSearch(e) {
   const maxHeight = Math.round(heightValues[1]);
 
   // Get Checkboxes
-  const immigration = Array.from(document.querySelectorAll('input[name="immigration"]:checked'))
+  let immigration = Array.from(document.querySelectorAll('input[name="immigration"]:checked'))
     .map(cb => cb.value);
 
   // --- Build Query ---
   // Querying 'ma_biodata' as requested
   let query = supabase.schema("cabo").from("ma_biodata").select("*");
+  let debugSql = "SELECT * FROM cabo.ma_biodata";
+  let debugWhere = [];
 
   if (gender) {
     query = query.eq("gender", gender);
+    debugWhere.push(`gender = '${gender}'`);
   }
 
   if (occupation) {
     if (occupation === "Unknown") {
       query = query.is("occupation_tag", null);
+      debugWhere.push(`occupation_tag IS NULL`);
     } else {
       query = query.eq("occupation_tag", occupation);
+      debugWhere.push(`occupation_tag = '${occupation}'`);
     }
   }
 
@@ -217,13 +226,37 @@ async function handleSearch(e) {
   const maxDate = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate()).toISOString();
   
   query = query.gte("datetime_of_birth", minDate).lte("datetime_of_birth", maxDate);
+  debugWhere.push(`datetime_of_birth >= '${minDate}' AND datetime_of_birth <= '${maxDate}'`);
 
-  if (immigration.length > 0) {
-    // Using .in() for multiple selections
+  // Immigration Filter Logic
+  const includeUnknown = immigration.includes("Unknown");
+  immigration = immigration.filter(v => v !== "Unknown");
+
+  if (includeUnknown) {
+    if (immigration.length > 0) {
+      // Filter for (Selected Values OR Null)
+      const values = immigration.map(v => `"${v}"`).join(',');
+      query = query.or(`citizenship.in.(${values}),citizenship.is.null,citizenship.eq.`);
+      const debugValues = immigration.map(v => `'${v}'`).join(',');
+      debugWhere.push(`(citizenship IN (${debugValues}) OR citizenship IS NULL OR citizenship = '')`);
+    } else {
+      // Filter for Null only
+      query = query.or(`citizenship.is.null,citizenship.eq.`);
+      debugWhere.push(`(citizenship IS NULL OR citizenship = '')`);
+    }
+  } else if (immigration.length > 0) {
+    // Filter for Selected Values only
     query = query.in("citizenship", immigration);
+    const debugValues = immigration.map(v => `'${v}'`).join(',');
+    debugWhere.push(`citizenship IN (${debugValues})`);
   }
 
-  query = query.order('last_name', { ascending: true });
+  query = query.order('last_name', { ascending: true }).order('first_name', { ascending: true });
+
+  if (debugWhere.length > 0) {
+    debugSql += " WHERE " + debugWhere.join(" AND ");
+  }
+  console.log("🚀 Executing SQL:", debugSql + " ORDER BY last_name ASC, first_name ASC");
 
   const { data, error } = await query;
 

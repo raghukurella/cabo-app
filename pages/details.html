@@ -1,6 +1,9 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Profile Details</h1>
+    <div class="flex items-center gap-4">
+      <img id="headerProfilePhoto" class="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile">
+      <h1 class="text-2xl font-bold text-gray-900">Profile Details</h1>
+    </div>
     <div class="space-x-2">
       <button id="btnEdit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
         Edit Profile
@@ -63,7 +66,12 @@
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Citizenship / Immigration</label>
-        <input type="text" name="citizenship" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" disabled>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <label class="flex items-center gap-2"><input type="radio" name="citizenship" value="US Citizen" class="rounded-full text-indigo-600" disabled> <span class="text-sm">US Citizen</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="citizenship" value="Green Card" class="rounded-full text-indigo-600" disabled> <span class="text-sm">Green Card</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="citizenship" value="H1B" class="rounded-full text-indigo-600" disabled> <span class="text-sm">H1B</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="citizenship" value="Unknown" class="rounded-full text-indigo-600" disabled> <span class="text-sm">Unknown</span></label>
+        </div>
       </div>
     </div>
 

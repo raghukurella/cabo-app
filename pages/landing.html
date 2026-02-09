@@ -1,11 +1,14 @@
 <div class="bg-white">
   <!-- Hero Section -->
   <div class="relative isolate px-6 pt-8 lg:px-8">
-    <div class="mx-auto max-w-2xl py-8 sm:py-12 lg:py-16 text-center">
-      <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Find Your Perfect Match</h1>
-      <p class="mt-6 text-lg leading-8 text-gray-600">
-        Welcome to MatchMaker. We specialize in connecting individuals with compatible partners through a detailed and personalized matchmaking process.
-      </p>
+    <div class="mx-auto max-w-4xl py-8 sm:py-12 lg:py-16 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+      <img class="h-48 w-48 rounded-full object-cover object-top shadow-lg border-4 border-white flex-shrink-0" src="assets/ne_re.png" alt="Site Manager">
+      <div>
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Find Your Perfect Match</h1>
+        <p class="mt-4 text-lg leading-8 text-gray-600">
+          Welcome to MatchMaker. We specialize in connecting individuals with compatible partners through a detailed and personalized matchmaking process.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -13,14 +16,17 @@
   <div class="mx-auto max-w-4xl px-6 pb-8 lg:px-8">
     <div id="searchToggleContainer" class="flex justify-center mb-4 gap-4">
       <button id="toggleSearchBtn" type="button" class="rounded-full bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100 ring-1 ring-inset ring-indigo-600/20">
-        Show Search Filters
+        Hide Search Filters
       </button>
       <button id="showAllBtn" type="button" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
         Show All
       </button>
+      <button id="addProfileBtn" type="button" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+        Add New Profile
+      </button>
     </div>
 
-    <div id="searchCard" class="hidden bg-white shadow-xl rounded-2xl p-6 border border-gray-100 transition-all duration-300">
+    <div id="searchCard" class="bg-white shadow-xl rounded-2xl p-6 border border-gray-100 transition-all duration-300">
       <h2 class="text-2xl font-semibold text-gray-900 mb-4">Quick Search</h2>
       
       <form id="landingSearchForm" class="space-y-6">
@@ -60,10 +66,11 @@
           <!-- Immigration Status -->
           <div class="md:col-span-2">
             <label class="block text-sm font-medium leading-6 text-gray-900 mb-3">Immigration Status</label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <label class="flex items-center gap-2"><input type="checkbox" name="immigration" value="US Citizen" class="rounded text-indigo-600" checked> <span class="text-sm">US Citizen</span></label>
               <label class="flex items-center gap-2"><input type="checkbox" name="immigration" value="Green Card" class="rounded text-indigo-600" checked> <span class="text-sm">Green Card</span></label>
               <label class="flex items-center gap-2"><input type="checkbox" name="immigration" value="H1B" class="rounded text-indigo-600" checked> <span class="text-sm">H1B</span></label>
+              <label class="flex items-center gap-2"><input type="checkbox" name="immigration" value="Unknown" class="rounded text-indigo-600" checked> <span class="text-sm">Unknown</span></label>
             </div>
           </div>
         </div>
@@ -76,7 +83,7 @@
   </div>
 
   <!-- Search Results Section -->
-  <div id="searchResultsSection" class="mx-auto max-w-7xl px-6 pb-12 lg:px-8">
+  <div id="searchResultsSection" class="mx-auto max-w-7xl px-6 pb-12 lg:px-8 hidden">
     <h2 class="text-2xl font-semibold text-gray-900 mb-4">Search Results</h2>
     <div id="searchResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <!-- Results injected here -->
