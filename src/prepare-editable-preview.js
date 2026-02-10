@@ -36,7 +36,6 @@ async function prepareEditablePreview(parsedData) {
         occupation: parsedData.occupation || "",
         company: parsedData.company || "",
         income: parsedData.income || "",
-        marital_status: parsedData.marital_status || "",
         location_city: parsedData.location_city || "",
         location_state: parsedData.location_state || "",
         location_country: parsedData.location_country || "",

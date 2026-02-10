@@ -48,6 +48,17 @@ export function init() {
   const nextBtn = document.getElementById("nextPageBtn");
   if (prevBtn) prevBtn.addEventListener("click", () => changePage(-1));
   if (nextBtn) nextBtn.addEventListener("click", () => changePage(1));
+
+  // Modal Listeners
+  const profileModal = document.getElementById("profileModal");
+  const closeProfileModalBtn = document.getElementById("closeProfileModalBtn");
+  const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+  if (closeProfileModalBtn) closeProfileModalBtn.addEventListener("click", closeProfileModal);
+  if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeProfileModal);
+  if (profileModal) {
+    profileModal.addEventListener("click", (e) => { if (e.target === profileModal) closeProfileModal(); });
+  }
 }
 
 function initSliders() {
@@ -353,8 +364,8 @@ function renderResults(profiles) {
         age = Math.abs(ageDate.getUTCFullYear() - 1970);
     }
 
-    // Truncate education if too long
-    const education = p.education ? (p.education.length > 25 ? p.education.substring(0, 22) + "..." : p.education) : "Not specified";
+    const occupationTag = p.occupation_tag || "Unknown";
+    const citizenship = p.citizenship || "Unknown";
 
     card.innerHTML = `
       ${imgHtml}
@@ -377,12 +388,12 @@ function renderResults(profiles) {
              <span class="font-medium text-gray-900">${p.height || "-"}</span>
            </div>
            <div class="flex justify-between">
-             <span>Education:</span>
-             <span class="font-medium text-gray-900" title="${p.education || ""}">${education}</span>
+             <span>Occupation:</span>
+             <span class="font-medium text-gray-900" title="${p.occupation || ""}">${occupationTag}</span>
            </div>
            <div class="flex justify-between">
              <span>Immigration:</span>
-             <span class="font-medium text-gray-900">${p.citizenship || "-"}</span>
+             <span class="font-medium text-gray-900">${citizenship}</span>
            </div>
         </div>
 
@@ -394,9 +405,7 @@ function renderResults(profiles) {
       </div>
     `;
 
-    card.addEventListener("click", () => {
-        window.location.hash = `#/details/${p.id}`;
-    });
+    card.addEventListener("click", () => openProfileModal(p));
 
     grid.appendChild(card);
   });
@@ -434,4 +443,71 @@ async function loadOccupationOptions() {
     option.textContent = tag;
     select.appendChild(option);
   });
+}
+
+function openProfileModal(p) {
+  const modal = document.getElementById("profileModal");
+  const nameEl = document.getElementById("modalProfileName");
+  const contentEl = document.getElementById("modalProfileContent");
+  const editBtn = document.getElementById("modalEditBtn");
+
+  if (!modal) return;
+
+  const name = `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Unnamed";
+  nameEl.textContent = name;
+
+  // Setup Edit Button
+  editBtn.onclick = () => {
+    window.location.hash = `#/details/${p.id}?edit=true`;
+  };
+
+  // Photo logic
+  let photoUrl = null;
+  if (Array.isArray(p.photos) && p.photos.length > 0) {
+    photoUrl = p.photos[0];
+  } else if (typeof p.photos === "string") {
+    try {
+      const parsed = JSON.parse(p.photos);
+      if (Array.isArray(parsed) && parsed.length > 0) photoUrl = parsed[0];
+    } catch(e) {}
+  }
+  const imgHtml = photoUrl 
+    ? `<img src="${photoUrl}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md mx-auto mb-4" alt="Profile Photo">` 
+    : `<div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm mx-auto mb-4 border-4 border-white shadow-md">No Photo</div>`;
+
+  // Calculate Age
+  let age = "N/A";
+  if (p.datetime_of_birth) {
+    const dob = new Date(p.datetime_of_birth);
+    const diff = Date.now() - dob.getTime();
+    const ageDate = new Date(diff);
+    age = Math.abs(ageDate.getUTCFullYear() - 1970);
+  }
+
+  contentEl.innerHTML = `
+    <div class="text-center">
+      ${imgHtml}
+      <h4 class="text-xl font-bold text-gray-900">${name}</h4>
+      <p class="text-sm text-gray-500">${p.occupation || "Occupation not specified"}</p>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mt-6">
+      <div><span class="font-semibold text-gray-700">Age:</span> ${age}</div>
+      <div><span class="font-semibold text-gray-700">Gender:</span> ${p.gender || "-"}</div>
+      <div><span class="font-semibold text-gray-700">Height:</span> ${p.height || "-"}</div>
+      <div><span class="font-semibold text-gray-700">Location:</span> ${p.current_location || "-"}</div>
+      <div><span class="font-semibold text-gray-700">Citizenship:</span> ${p.citizenship || "-"}</div>
+      <div><span class="font-semibold text-gray-700">Education:</span> ${p.education || "-"}</div>
+    </div>
+    <div class="mt-4">
+      <h5 class="font-semibold text-gray-800 mb-1">About</h5>
+      <p class="text-gray-600 text-sm leading-relaxed">${p.bio || "No bio available."}</p>
+    </div>
+  `;
+
+  modal.classList.remove("hidden");
+}
+
+function closeProfileModal() {
+  const modal = document.getElementById("profileModal");
+  if (modal) modal.classList.add("hidden");
 }

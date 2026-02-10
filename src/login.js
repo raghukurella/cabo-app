@@ -10,6 +10,18 @@ export function init() {
   const passwordInput = document.getElementById("password");
   const rememberMeInput = document.getElementById("rememberMe");
 
+  // Modal Logic
+  const openBtn = document.getElementById("openLoginModalBtn");
+  const closeBtn = document.getElementById("closeLoginModalBtn");
+  const modal = document.getElementById("loginModal");
+
+  if (openBtn && modal) {
+    openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+  }
+  if (closeBtn && modal) {
+    closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  }
+
   if (!btn) return;
 
   btn.addEventListener("click", async (e) => {

@@ -13,7 +13,6 @@ const FIELD_CONFIG = [
   { key: "dob", label: "Date of Birth" },
   { key: "age", label: "Age" },
   { key: "height", label: "Height" },
-  { key: "marital_status", label: "Marital Status", type: "select", options: ["Never Married", "Divorced", "Widowed", "Separated", "Annulled"] },
   { key: "religion", label: "Religion" },
   { key: "caste", label: "Caste" },
   { key: "subcaste", label: "Subcaste" },

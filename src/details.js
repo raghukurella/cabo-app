@@ -6,8 +6,19 @@ let currentPhotos = [];
 let isEditing = false;
 
 export async function init(id) {
-  currentProfileId = id;
-  console.log("Details page init for:", id);
+  // Handle query params (e.g. ?edit=true)
+  let profileId = id;
+  let autoEdit = false;
+  
+  if (id && id.includes("?")) {
+    const parts = id.split("?");
+    profileId = parts[0];
+    const params = new URLSearchParams(parts[1]);
+    if (params.get("edit") === "true") autoEdit = true;
+  }
+
+  currentProfileId = profileId;
+  console.log("Details page init for:", profileId);
 
   const btnEdit = document.getElementById("btnEdit");
   const btnSave = document.getElementById("btnSave");
@@ -33,7 +44,14 @@ export async function init(id) {
   if (btnSaveTag) btnSaveTag.addEventListener("click", addNewTag);
 
   await loadOccupationTags();
-  await loadProfile(id);
+  await loadProfile(profileId);
+
+  // Auto-enable edit mode if requested and allowed
+  if (autoEdit) {
+    if (btnEdit && !btnEdit.classList.contains("hidden")) {
+      enableEditMode();
+    }
+  }
 }
 
 async function loadProfile(id) {
@@ -56,6 +74,7 @@ async function loadProfile(id) {
 
   originalData = data;
   populateForm(data);
+  await checkPermissions(data);
 
   loading.classList.add("hidden");
   form.classList.remove("hidden");
@@ -399,4 +418,34 @@ function addNewTag() {
   select.value = tag;
   document.getElementById("tagModal").classList.add("hidden");
   input.value = "";
+}
+
+async function checkPermissions(profileData) {
+  const btnEdit = document.getElementById("btnEdit");
+  const btnDelete = document.getElementById("btnDelete");
+  
+  // Default to hidden to prevent flash of unauthorized actions
+  if (btnEdit) btnEdit.classList.add("hidden");
+  if (btnDelete) btnDelete.classList.add("hidden");
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
+  const currentUserId = user?.id;
+
+  // 1. Admin Override
+  if (currentUserId) {
+     const { data: admin } = await supabase.schema("cabo").from("mm_admin").select("id").eq("auth_user_id", currentUserId).maybeSingle();
+     if (admin) {
+         if (btnEdit) btnEdit.classList.remove("hidden");
+         if (btnDelete) btnDelete.classList.remove("hidden");
+         return;
+     }
+  }
+
+  // 2. Owner Check (Check common ownership fields)
+  const ownerId = profileData.created_by || profileData.user_id || profileData.auth_user_id;
+  if (currentUserId && ownerId && currentUserId === ownerId) {
+      if (btnEdit) btnEdit.classList.remove("hidden");
+      if (btnDelete) btnDelete.classList.remove("hidden");
+  }
 }

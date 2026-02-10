@@ -10,7 +10,6 @@ const FIELD_CONFIG = [
   { key: "dob", label: "Date of Birth", type: "date" },
   { key: "age", label: "Age", readonly: true },
   { key: "height", label: "Height" },
-  { key: "marital_status", label: "Marital Status", type: "select", options: ["Never Married", "Divorced", "Widowed", "Separated", "Annulled"] },
   { key: "religion", label: "Religion" },
   { key: "caste", label: "Caste" },
   { key: "subcaste", label: "Subcaste" },
@@ -59,6 +58,13 @@ export function init() {
   }
 
   if (form) form.addEventListener("submit", handleSave);
+
+  // Check for pending data from upload-biodata page
+  const pending = sessionStorage.getItem("pendingBiodata");
+  if (pending) {
+    document.getElementById("rawText").value = pending;
+    sessionStorage.removeItem("pendingBiodata");
+  }
 }
 
 async function handleParse() {
@@ -196,9 +202,9 @@ async function runClientSidePipeline(intakeId) {
   } catch (err) {
     // If LLM fails or isn't configured, we silently fall back to Regex
     console.warn("LLM Parsing skipped/failed (falling back to Regex):", err.message);
-    if (err.message.includes("CORS") || err.message.includes("Edge Function")) {
-      alert("Warning: " + err.message + "\n\nFalling back to basic Regex parsing.");
-    }
+//    if (err.message.includes("CORS") || err.message.includes("Edge Function")) {
+//      alert("Warning: " + err.message + "\n\nFalling back to basic Regex parsing.");
+//    }
   }
 
   const rawDob = (cleanedText.match(/(?:DOB|Date of Birth|Born)\s*:\s*(.*)/i) || [])[1] || "";
@@ -743,7 +749,6 @@ async function parseWithOpenAI(text, examples) {
   - family_details (Summarize family info)
   - bio (The full text or a summary)
   - partner_preferences
-  - marital_status
   - looking_for (Value must be "Bride" or "Groom" based on context)
   
   If a field is not found, use an empty string "". Return ONLY valid JSON.`;

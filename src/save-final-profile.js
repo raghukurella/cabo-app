@@ -59,7 +59,7 @@ async function saveFinalProfile(editedProfile) {
 
 function validateFinalProfile(fields) {
   // 'gender' is often required for matchmaking logic, ensuring it's present
-  const required = ['name', 'dob', 'gender', 'marital_status', 'location_city'];
+  const required = ['name', 'dob', 'gender', 'location_city'];
   const missing = required.filter(field => !fields[field] || (typeof fields[field] === 'string' && fields[field].trim() === ''));
 
   if (missing.length > 0) {
@@ -118,7 +118,6 @@ async function insertProfileIntoDB(data) {
     occupation: data.occupation,
     company: data.company,
     income: data.income,
-    marital_status: data.marital_status,
     location_city: data.location_city,
     location_state: data.location_state,
     location_country: data.location_country,

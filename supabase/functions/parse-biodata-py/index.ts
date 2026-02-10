@@ -56,7 +56,6 @@ Extract the following fields from the text into a flat JSON object:
 - family_details (Summarize family info)
 - bio (The full text or a summary)
 - partner_preferences
-- marital_status
 - looking_for (Value must be "Bride" or "Groom" based on context)
 
 If a field is not found, use an empty string "". Return ONLY valid JSON.`;

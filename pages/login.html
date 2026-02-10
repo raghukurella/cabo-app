@@ -1,36 +1,76 @@
-<div class="flex flex-col items-center mt-4 space-y-2">
-  <h1 class="text-2xl font-semibold text-gray-800">Welcome Back</h1>
-  <p class="text-sm text-gray-600">Log in to MatchMaker</p>
-</div>
-
-<form class="mt-10 flex flex-col space-y-6 w-full max-w-sm mx-auto">
-
-  <div>
-    <label class="block text-gray-700 mb-1">Email</label>
-    <input id="email" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+<div class="bg-white relative">
+  <div class="absolute top-6 right-6 z-20">
+    <button id="openLoginModalBtn" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Log in <span aria-hidden="true">&rarr;</span></button>
   </div>
 
-  <div>
-    <label class="block text-gray-700 mb-1">Password</label>
-    <input id="password" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
-  </div>
-
-  <div class="flex items-center justify-between">
-    <div class="flex items-center">
-      <input id="rememberMe" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
-      <label for="rememberMe" class="ml-2 block text-sm text-gray-900">Remember me</label>
+  <!-- Hero Section -->
+  <div class="relative isolate px-6 pt-4 lg:px-8">
+    <div class="mx-auto max-w-6xl py-4 sm:py-6 lg:py-8 flex flex-col sm:flex-row items-start gap-8 text-center sm:text-left">
+      <img class="h-48 w-48 rounded-full object-cover object-top shadow-2xl border-4 border-gray-900 bg-gray-900 flex-shrink-0" src="assets/ne_re.png" alt="Site Manager">
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-gray-900 sm:text-3xl">Thoughtful connections, one match at a time</h1>
+        <p class="text-sm font-medium text-gray-500 sm:text-lg mt-1">Rooted in culture, led with care.</p>
+        <div class="mt-6 md:columns-2 gap-8 text-lg leading-8 text-gray-600">
+          <p class="mb-4">
+            It is my passion is to bring NRI families and professionals together with intention, helping you discover compatible, culturally rooted matches shaped with care, understanding, and the warmth of our shared traditions.
+          </p>
+          <p class="mb-4">
+            Our volunteer matchmakers take the time to speak with you, understand your needs, and honor the sentiments that matter to your family. While many hope their children find partners through school, work, or social circles, life doesn’t always align that neatly — busy schedules, limited networks, or simply trusting family guidance can make the search challenging. That’s where we specialize. We listen closely to every family we meet, learn their preferences and values, and suggest matches with the same care and intention that guided how our own generation found life partners.
+          </p>
+          <p class="mb-4">
+            You can <a href="#/upload-biodata" class="text-blue-600 hover:underline">upload your profile</a> or biodata in any format, and we’ll parse it for you to review, edit, and finalize. Creating an account allows you to update your profile anytime and add additional photos whenever you’re ready.
+          </p>
+        </div>
+        <img src="assets/sig.png" alt="Signature" class="mt-6 h-36 object-contain">
+      </div>
     </div>
-    <a href="#/forgot-password" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
   </div>
 
-  <button id="loginBtn" type="button"
-    class="w-full bg-blue-600 text-white text-lg font-medium py-3 rounded-lg text-center">
-    Log In
-  </button>
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl relative">
+      <button id="closeLoginModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
-  <a href="#/signup"
-    class="w-full border border-blue-600 text-blue-600 text-lg font-medium py-3 rounded-lg text-center">
-    Create Account
-  </a>
+      <div class="flex flex-col items-center mt-2 space-y-2">
+        <h1 class="text-2xl font-semibold text-gray-800">Welcome to NeerajaReddy.com</h1>
+        <p class="text-sm text-gray-600">Log in to MatchMaker</p>
+      </div>
 
-</form>
+      <form class="mt-6 flex flex-col space-y-6">
+
+        <div>
+          <label class="block text-gray-700 mb-1">Email</label>
+          <input id="email" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Password</label>
+          <input id="password" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-3" />
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input id="rememberMe" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
+            <label for="rememberMe" class="ml-2 block text-sm text-gray-900">Remember me</label>
+          </div>
+          <a href="#/forgot-password" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
+        </div>
+
+        <button id="loginBtn" type="button"
+          class="w-full bg-blue-600 text-white text-lg font-medium py-3 rounded-lg text-center">
+          Log In
+        </button>
+
+        <a href="#/signup"
+          class="w-full border border-blue-600 text-blue-600 text-lg font-medium py-3 rounded-lg text-center">
+          Create Account
+        </a>
+
+      </form>
+    </div>
+  </div>
+</div>
