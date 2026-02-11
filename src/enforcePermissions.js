@@ -6,6 +6,8 @@ export function enforcePermissions() {
 
     if (!hasPermission(perm)) {
       el.style.display = "none";
+    } else {
+      el.style.display = "";
     }
   });
 }

@@ -110,6 +110,8 @@ async function loadPage() {
   if (session) {
     const permissions = await loadPermissions();
     permissionStore.set(permissions);
+  } else {
+    permissionStore.set([]);
   }
 
   // ------------------------------------------------------------

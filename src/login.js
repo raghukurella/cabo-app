@@ -1,6 +1,6 @@
 import { supabase } from "./supabase.js";
 
-console.log("🔥 login.js LOADED");
+console.log("🔥 login.js LOADED...");
 
 export function init() {
   console.log("login.js init running");
@@ -64,6 +64,26 @@ export function init() {
           user_agent: navigator.userAgent,
           device_info: "Web Client"
         });
+
+        // Log Security Role
+        const { data: person } = await window.supabase
+          .schema("cabo")
+          .from("mm_people")
+          .select("role")
+          .eq("auth_id", user.id)
+          .maybeSingle();
+        
+        console.log("🔐 Security Role:", person?.role || "None");
+
+        // Fetch and alert permissions
+        const { data: permissions, error: permError } = await window.supabase
+          .rpc('fn_permissions_for_user', { target_user_id: user.id });
+
+        if (permError) {
+          console.error("Error fetching permissions:", permError);
+        } else {
+          console.log("User Permissions:", permissions);
+        }
       }
     } catch (err) { console.error("Tracking failed", err); }
 

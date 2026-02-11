@@ -42,7 +42,7 @@
   <!-- Right: Navigation links -->
   <div class="hidden md:flex md:items-center md:gap-6">
     <a href="#/login" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Home</a>
-    <a href="#/" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Search</a>
+    <a href="#/" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600" data-permission="view_all_profiles">Search</a>
     <a href="#/process-biodata" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Add New Profile</a>
     <a href="#/logout" class="text-sm font-semibold leading-6 text-red-600 hover:text-red-500">Log out</a>
   </div>
@@ -50,10 +50,10 @@
 
 <!-- Mobile dropdown -->
 <nav id="mobileMenu" class="hidden absolute top-16 left-0 w-full z-50 flex flex-col bg-white border-b border-gray-200 px-4 py-3 shadow-lg md:hidden">
-  <a href="#/home" class="py-1 text-blue-600">home</a>
-  <a href="#/my-profiles" class="py-1 text-blue-600">my profiles</a>
-  <a href="#/process-biodata" class="py-1 text-blue-600">process biodata</a>
-  <a href="#/logout" class="py-1 text-red-600">log out</a>
+    <a href="#/login" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Home</a>
+    <a href="#/" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600" data-permission="view_all_profiles">Search</a>
+    <a href="#/process-biodata" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Add New Profile</a>
+    <a href="#/logout" class="text-sm font-semibold leading-6 text-red-600 hover:text-red-500">Log out</a>
 </nav>
 
 
