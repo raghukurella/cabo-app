@@ -9,6 +9,7 @@ import { permissionStore } from "./permissionStore.js";
 import { hasPermission } from "./hasPermission.js";
 import { forceLogout } from "./forceLogout.js";
 import { enforcePermissions } from "./enforcePermissions.js";
+import { updateMenuAuth } from "./update-menu.js";
 // ------------------------------------------------------------
 // AUTH CHECK
 // ------------------------------------------------------------
@@ -211,6 +212,7 @@ async function loadPage() {
   if (!loadSuccess) return;
 
   enforcePermissions();
+  updateMenuAuth();
 
   // ------------------------------------------------------------
   // LOAD PAGE-SPECIFIC JS

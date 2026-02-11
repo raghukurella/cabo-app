@@ -44,7 +44,10 @@
     <a href="#/login" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Home</a>
     <a href="#/" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600" data-permission="view_all_profiles">Search</a>
     <a href="#/process-biodata" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Add New Profile</a>
-    <a href="#/logout" class="text-sm font-semibold leading-6 text-red-600 hover:text-red-500">Log out</a>
+    <div class="flex flex-col items-end">
+      <a href="#/logout" id="desktopAuthLink" class="text-sm font-semibold leading-6 text-red-600 hover:text-red-500">Log out</a>
+      <span id="desktopUsername" class="text-xs text-gray-500 hidden"></span>
+    </div>
   </div>
 </header>
 
@@ -53,7 +56,10 @@
     <a href="#/login" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Home</a>
     <a href="#/" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600" data-permission="view_all_profiles">Search</a>
     <a href="#/process-biodata" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Add New Profile</a>
-    <a href="#/logout" class="text-sm font-semibold leading-6 text-red-600 hover:text-red-500">Log out</a>
+    <div class="flex flex-col items-start mt-2">
+      <a href="#/logout" id="mobileAuthLink" class="text-sm font-semibold leading-6 text-red-600 hover:text-red-500">Log out</a>
+      <span id="mobileUsername" class="text-xs text-gray-500 hidden"></span>
+    </div>
 </nav>
 
 
