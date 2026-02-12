@@ -19,7 +19,7 @@ export async function updateMenuAuth() {
         usernameEl.classList.remove("hidden");
       }
     } else {
-      link.textContent = "Log In";
+      link.textContent = "Welcome";
       link.href = "#/login";
       if (usernameEl) {
         usernameEl.classList.add("hidden");

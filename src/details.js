@@ -58,7 +58,7 @@ async function loadProfile(id) {
   const loading = document.getElementById("loadingState");
   const form = document.getElementById("detailsForm");
 
-  // Fetch from ma_biodata as per landing page source
+  // Fetch from ma_biodata as per main page source
   const { data, error } = await supabase
     .schema("cabo")
     .from("ma_biodata")

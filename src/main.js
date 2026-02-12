@@ -5,8 +5,16 @@ let allFilteredProfiles = [];
 let currentPage = 1;
 const pageSize = 20;
 
-export function init() {
-  console.log("Landing page init");
+export async function init() {
+  console.log("Main page init");
+
+  const { data } = await supabase.auth.getSession();
+  const session = data?.session;
+  const authContainer = document.getElementById("mainAuthContainer");
+
+  if (authContainer && session) {
+    authContainer.style.display = "none";
+  }
 
   // ✅ Attach listeners early so they work even if sliders/data fail
   const addProfileBtn = document.getElementById("addProfileBtn");
@@ -29,7 +37,7 @@ export function init() {
 
   loadOccupationOptions();
   
-  const form = document.getElementById("landingSearchForm");
+  const form = document.getElementById("mainSearchForm");
   if (form) {
     form.addEventListener("submit", handleSearch);
   }
@@ -125,7 +133,7 @@ function toggleSearchVisibility() {
 }
 
 function handleShowAll() {
-  const form = document.getElementById("landingSearchForm");
+  const form = document.getElementById("mainSearchForm");
   if (!form) return;
 
   // Reset dropdowns

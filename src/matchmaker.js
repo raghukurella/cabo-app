@@ -209,7 +209,7 @@ async function loadPeopleWithFilters() {
         .schema("cabo")
         .from("mm_people")
         .select("*")
-        .eq("auth_id", userId)
+        .eq("created_by", userId)
         .order("last_name", { ascending: true });
 
       if (error) {

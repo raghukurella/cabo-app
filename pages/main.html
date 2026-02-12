@@ -1,4 +1,8 @@
-<div class="bg-white">
+<div class="bg-white relative">
+
+  <div id="mainAuthContainer" class="absolute top-6 right-6 z-20">
+    <a href="#/login" id="mainLoginLink" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600">Log in <span aria-hidden="true">&rarr;</span></a>
+  </div>
 
   <!-- Search Section -->
   <div class="mx-auto max-w-4xl px-6 pb-8 lg:px-8">
@@ -11,12 +15,12 @@
     <div id="searchCard" class="bg-white shadow-xl rounded-2xl p-6 border border-gray-100 transition-all duration-300">
       <h2 class="text-2xl font-semibold text-gray-900 mb-4">Quick Search</h2>
       
-      <form id="landingSearchForm" class="space-y-6">
+      <form id="mainSearchForm" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           <!-- Gender -->
           <div>
-            <label class="block text-sm font-medium leading-6 text-gray-900 mb-2">Looking For.</label>
+            <label class="block text-sm font-medium leading-6 text-gray-900 mb-2">Looking For</label>
             <select id="searchGender" class="block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
               <option value="">Any Gender</option>
               <option value="Female">Bride (Female)</option>

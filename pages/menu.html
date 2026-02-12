@@ -1,56 +1,20 @@
 <div class="menu-container">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Menu</h1>
-    <a href="#/logout" class="text-red-600 font-medium text-sm">Logout</a>
+    <h1 class="text-2xl font-bold text-gray-800">Site Map</h1>
+    <a href="#/logout" class="text-red-600 font-medium text-sm">Logout...</a>
   </div>
 
-  <div class="menu-grid">
-    <!-- My Profiles -->
-    <div class="menu-card" onclick="window.location.hash='#/my-profiles'">
-      <h2>My Profiles</h2>
-      <p>View and edit profiles you created</p>
-    </div>
+  <style>
+    .menu-container { max-width: 1000px; margin: 0 auto; padding: 1em; }
+    .menu-section { margin-bottom: 2rem; }
+    .menu-section h3 { font-size: 1.25rem; font-weight: 600; color: #4b5563; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+    .menu-card { background: #fff; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; transition: all 0.2s; cursor: pointer; }
+    .menu-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-color: #3b82f6; }
+    .menu-card h4 { font-weight: 600; color: #111827; margin-bottom: 0.25rem; }
+    .menu-card p { font-size: 0.875rem; color: #6b7280; }
+    .menu-card code { font-size: 0.75rem; background: #f3f4f6; padding: 2px 4px; rounded; color: #ec4899; display: block; margin-top: 0.5rem; }
+  </style>
 
-    <!-- Matchmaker -->
-    <div class="menu-card" onclick="window.location.hash='#/matchmaker'">
-      <h2>Matchmaker</h2>
-      <p>Search and filter profiles</p>
-    </div>
-
-    <!-- All Profiles -->
-    <div class="menu-card" onclick="window.location.hash='#/all-profiles'">
-      <h2>All Profiles</h2>
-      <p>Browse all profiles in a grid</p>
-    </div>
-
-    <!-- Prospect (NEW) -->
-    <div class="menu-card" onclick="window.location.hash='#/prospect'">
-      <h2>New Prospect</h2>
-      <p>Add a new person to the database</p>
-    </div>
-
-    <!-- Questions -->
-    <div class="menu-card" onclick="window.location.hash='#/questions-manage'">
-      <h2>Manage Questions</h2>
-      <p>Add or edit profile questions</p>
-    </div>
-
-    <!-- Admin -->
-    <div class="menu-card" onclick="window.location.hash='#/admin'">
-      <h2>Admin</h2>
-      <p>Manage matchmakers and users</p>
-    </div>
-
-    <!-- Login History -->
-    <div class="menu-card" onclick="window.location.hash='#/login-history'">
-      <h2>Login History</h2>
-      <p>View your recent login activity</p>
-    </div>
-
-    <!-- Security -->
-    <div class="menu-card" onclick="window.location.hash='#/security'">
-      <h2>Security</h2>
-      <p>Password and account settings</p>
-    </div>
-  </div>
+  <div id="dynamic-menu-root"></div>
 </div>
